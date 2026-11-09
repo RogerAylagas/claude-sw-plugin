@@ -1,0 +1,20 @@
+# Quality gate. `just setup` installs it; CI runs it via `just lint`.
+# Update hook versions with `uvx pre-commit autoupdate`.
+default_install_hook_types: [pre-commit, commit-msg]
+
+repos:
+# sw:include precommit-common.yaml
+
+  # --- TypeScript / JavaScript (tools come from node_modules: run `just setup` first) ---
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: node node_modules/prettier/bin/prettier.cjs --write --ignore-unknown
+        language: system
+        types_or: [javascript, jsx, ts, tsx, css, scss, html]
+      - id: eslint
+        name: eslint
+        entry: node node_modules/eslint/bin/eslint.js --fix --max-warnings=0
+        language: system
+        types_or: [javascript, jsx, ts, tsx]

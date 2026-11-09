@@ -1,0 +1,13 @@
+//! Integration smoke test. Placeholder: replace with tests that cross real boundaries.
+
+use std::process::Command;
+
+#[test]
+fn prints_greeting() {
+    let output = Command::new(env!("CARGO_BIN_EXE_{{PROJECT_NAME}}"))
+        .output()
+        .expect("the binary runs");
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert_eq!(stdout.trim(), "Hello, world!");
+}

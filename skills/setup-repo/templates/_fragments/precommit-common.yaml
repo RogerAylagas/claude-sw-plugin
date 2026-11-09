@@ -1,0 +1,42 @@
+  # --- sw common hooks: file hygiene, secrets, CI config, branch and commit conventions ---
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-yaml
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-added-large-files
+      - id: detect-private-key
+      - id: no-commit-to-branch
+        name: branch name follows Conventional Branch (no direct commits to main/develop)
+        args:
+          - --branch=main
+          - --branch=develop
+          - '--pattern=^(?!(feature|feat|bugfix|fix|hotfix|release|chore)/[a-z0-9]+(\.[a-z0-9]+)*(-[a-z0-9]+(\.[a-z0-9]+)*)*$)'
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.39.0
+    hooks:
+      - id: check-github-workflows
+      - id: check-dependabot
+
+  - repo: local
+    hooks:
+      - id: conventional-commit
+        name: commit message follows Conventional Commits
+        language: pygrep
+        entry: '\A(?:(?:feat|fix|build|chore|ci|docs|style|refactor|perf|test|revert)(?:\([a-z0-9._/-]+\))?!?: \S|Merge |Revert "|(?:fixup|squash|amend)! )'
+        args: [--multiline, --negate]
+        stages: [commit-msg]

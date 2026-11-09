@@ -1,0 +1,8 @@
+//! Integration smoke test. Placeholder: replace with tests that cross real boundaries.
+
+use {{PACKAGE_NAME}}::greet;
+
+#[test]
+fn public_api_is_usable() {
+    assert_eq!(greet("ci"), "Hello, ci!");
+}

@@ -1,0 +1,8 @@
+#include <iostream>
+
+#include "{{PACKAGE_NAME}}/{{PACKAGE_NAME}}.hpp"
+
+int main() {
+  std::cout << {{PACKAGE_NAME}}::greet("world") << '\n';
+  return 0;
+}

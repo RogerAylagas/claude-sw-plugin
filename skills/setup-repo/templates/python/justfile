@@ -1,0 +1,39 @@
+# {{PROJECT_NAME}} tasks. CI runs these same recipes; `just check` must pass before a PR.
+set windows-shell := ["powershell.exe", "-NoLogo", "-NoProfile", "-Command"]
+
+# List recipes
+default:
+    @just --list
+
+# Install dependencies and git hooks (run once after cloning)
+setup:
+    uv sync
+    uv run pre-commit install
+
+# Format code and apply safe lint fixes
+fmt:
+    uv run ruff format
+    uv run ruff check --fix
+
+# All pre-commit hooks on all files
+lint:
+    uv run pre-commit run --all-files --show-diff-on-failure
+
+# Static type checks (mypy, strict)
+analyze:
+    uv run mypy
+
+# Build the sdist and wheel
+build:
+    uv build
+
+# Unit tests with coverage
+test:
+    uv run pytest tests/unit --cov --cov-report=term-missing
+
+# Integration tests
+test-integration:
+    uv run pytest tests/integration
+
+# Everything CI runs
+check: lint analyze build test test-integration
