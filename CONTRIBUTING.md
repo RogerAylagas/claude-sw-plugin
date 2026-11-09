@@ -46,7 +46,9 @@ On Windows, run `just` recipes from Git Bash.
 ## Testing expectations
 
 - Hook scripts and helper scripts: add or update a case in `tests/`.
-- Skills: add or update an eval case in `evals/` and run it (`just evals`, costs real model calls).
+- Skills: add or update an eval case in `evals/` and run it (`just evals`, costs real model calls;
+  cases that use Bash need Claude Code's sandbox, so run them on Linux, macOS or WSL2, or with
+  the manual **Evals** workflow, which needs an `ANTHROPIC_API_KEY` repository secret).
 - Templates: `just test-templates <language>` renders the templates into a temporary project and
   runs its full check.
 

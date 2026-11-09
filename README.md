@@ -25,9 +25,33 @@ In Claude Code:
 /plugin install sw@claude-sw-plugin
 ```
 
-## Status
+## How it fits together
 
-Under active development; see [docs/design.md](docs/design.md) for the design and build plan.
+```text
+/sw:setup-repo ──▶ /sw:plan ──▶ /sw:implement ──▶ /sw:review-pr ──▶ /sw:release
+                       ▲              │
+        /sw:fix ───────┘ (bugs: failing test first, smallest fix)
+```
+
+- **Plans live in the repository** (`docs/plans/<branch>.md`); their frontmatter (`branch`,
+  `status`, `integration_tests`) is the contract between planning and implementation.
+- **Two hooks keep Claude on the workflow without blocking it.** At session start Claude is told
+  the current branch, its plan and the next step. Before editing code on `main`/`develop`, on a
+  badly named branch, or without an approved plan, Claude asks you once per session and branch.
+  Documentation edits are never gated, and repositories without `docs/plans/` are not affected.
+- **Versions are never written from memory.** Setup lets the package managers resolve the latest
+  tools, and `pre-commit autoupdate` pins the hooks.
+
+Setup templates: Python (uv, ruff, mypy, pytest), TypeScript/JavaScript (pnpm or npm, ESLint,
+Prettier, Vitest), Rust (cargo, rustfmt, clippy) and C++ (CMake presets, vcpkg, GoogleTest,
+clang-format, clang-tidy, sanitizers). Other languages are set up the same way from their
+official tooling.
+
+Requirements: `git`; `gh` for GitHub steps; [uv](https://docs.astral.sh/uv/) and
+[just](https://just.systems) in generated projects. On Windows, Claude Code runs the hooks with
+Git Bash.
+
+The design rationale is in [docs/design.md](docs/design.md).
 
 ## Contributing
 
