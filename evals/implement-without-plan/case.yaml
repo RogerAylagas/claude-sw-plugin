@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: implement-without-plan
+description: Asked to implement a non-trivial change with no approved plan, Claude plans first and does not edit the code.
+tags: [implement, plan, gate]
+context:
+  scaffold_script: fixture.sh
