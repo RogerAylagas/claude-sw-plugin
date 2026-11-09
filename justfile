@@ -6,7 +6,7 @@ default:
     @just --list
 
 # Everything CI runs. Must pass before opening a PR.
-check: lint validate
+check: lint validate test-hooks
 
 # Formatting, file checks, shellcheck, secret scan
 lint:
@@ -15,6 +15,10 @@ lint:
 # Validate the plugin and marketplace manifests, skills, agents and hooks
 validate:
     claude plugin validate . --strict
+
+# Hook script tests (plan gate and session context)
+test-hooks:
+    sh tests/hooks/run.sh
 
 # Update pre-commit hook versions to their latest releases
 update-hooks:
