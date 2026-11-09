@@ -24,6 +24,11 @@ test-hooks:
 test-templates lang kind="app" pm="":
     sh tests/templates/smoke.sh {{lang}} {{kind}} {{pm}}
 
+# Behavior evals: real model calls billed to your account. Run before releases, not on every change.
+# Cases that use Bash need Claude Code's sandbox (Linux, macOS or WSL2; not native Windows).
+evals threshold="0.7" max_cost="10":
+    claude plugin eval . --trust-plugin --scaffold --allow-tools Bash Write Edit --threshold {{threshold}} --max-cost-usd {{max_cost}} --no-publish
+
 # Update pre-commit hook versions to their latest releases
 update-hooks:
     uvx pre-commit autoupdate
