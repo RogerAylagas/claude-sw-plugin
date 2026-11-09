@@ -1,0 +1,16 @@
+{
+  "name": "claude-sw-plugin",
+  "owner": {
+    "name": "Roger Aylagas Torres"
+  },
+  "metadata": {
+    "description": "The sw plugin: software lifecycle workflows for Claude Code, from repo setup to release."
+  },
+  "plugins": [
+    {
+      "name": "sw",
+      "source": "./",
+      "description": "Software lifecycle workflows: repo setup, planning, plan-driven implementation, bug fixes, review & PR, and releases."
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+# Eval run output (claude plugin eval)
+evals/results/
+
+# Local scratch
+.tmp/
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local Claude Code settings (shared settings live in .claude/settings.json)
+.claude/settings.local.json
