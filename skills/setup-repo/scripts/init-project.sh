@@ -65,19 +65,23 @@ case "$lang" in
         ;;
     typescript)
         pm=${pm:-pnpm}
+        need npm
         node_major=$(tr -d ' \r\nv' <.nvmrc 2>/dev/null || true)
-        tools="typescript @types/node${node_major:+@$node_major} vitest @vitest/coverage-v8 eslint @eslint/js typescript-eslint eslint-config-prettier prettier"
+        # TypeScript: the newest release typescript-eslint supports (its peer range), so a new
+        # TypeScript major that the linter can't load yet is never installed.
+        ts_range=$(npm view typescript-eslint peerDependencies.typescript 2>/dev/null || true)
+        typescript="typescript${ts_range:+@$ts_range}"
+        tools="@types/node${node_major:+@$node_major} vitest @vitest/coverage-v8 eslint @eslint/js typescript-eslint eslint-config-prettier prettier"
         case "$pm" in
             pnpm)
                 need pnpm
                 npm pkg set "packageManager=pnpm@$(pnpm --version)"
                 # shellcheck disable=SC2086 # word splitting of the tool list is intended
-                pnpm add --save-dev $tools
+                pnpm add --save-dev "$typescript" $tools
                 ;;
             npm)
-                need npm
                 # shellcheck disable=SC2086
-                npm install --save-dev $tools
+                npm install --save-dev "$typescript" $tools
                 ;;
             *) die "unsupported package manager '$pm' for typescript" ;;
         esac

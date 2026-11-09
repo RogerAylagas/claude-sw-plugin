@@ -25,6 +25,12 @@ Last reviewed: 2026-11-09.
 - The pre-commit hooks call `node node_modules/<tool>/...` directly, which works on Windows,
   macOS and Linux and with any package manager; run `just setup` before the first commit.
 - `@types/node` is pinned to the Node major in `.nvmrc`.
+- TypeScript is installed at the newest version inside typescript-eslint's supported peer range
+  (`npm view typescript-eslint peerDependencies.typescript`). In November 2026 that excludes
+  TypeScript 7 (the native compiler), which typescript-eslint can't load yet; when it can, the
+  range widens and nothing in the templates changes. If the user wants TypeScript 7 now, use it
+  for `tsc` only, side by side with TypeScript 6 for linting, as the TypeScript 7 release notes
+  describe.
 
 ## Retrofit notes
 
