@@ -10,7 +10,10 @@
 | `<lang>/` | Language files (`python`, `typescript`, `rust`, `cpp`). They override `common/` files with the same path. |
 | `_fragments/` | Snippets included by other templates. Never copied on their own. |
 
-This README is not rendered (only `common/` and `<lang>/` are).
+This README and `LICENSE` are not rendered (only `common/` and `<lang>/` are).
+
+Everything in this folder is licensed under [MIT No Attribution](LICENSE), so generated projects
+owe nothing to this one. The project's own license comes from the user's choice during setup.
 
 ## Markers
 

@@ -56,3 +56,10 @@ The design rationale is in [docs/design.md](docs/design.md).
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md).
+
+## License
+
+The plugin is licensed under the [MIT License](LICENSE). The setup templates in
+[`skills/setup-repo/templates/`](skills/setup-repo/templates/) are licensed under
+[MIT No Attribution](skills/setup-repo/templates/LICENSE), so projects created or updated with
+`/sw:setup-repo` don't need to carry this project's copyright notice.
