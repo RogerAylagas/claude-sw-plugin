@@ -27,9 +27,12 @@ If `just` is not installed, use `uvx --from rust-just just <recipe>` (needs [uv]
 
 | Command | What it does |
 |---|---|
-| `just check` | Everything CI runs locally (lint + validate + tests). Must pass before a PR. |
+| `just check` | Lint + validate + hook tests. Must pass before a PR. |
 | `just lint` | `pre-commit run --all-files` (formatting, YAML/JSON checks, shellcheck, secrets). |
 | `just validate` | `claude plugin validate . --strict`. |
+| `just test-hooks` | Tests for `hooks/scripts/` (CI runs them on Linux, macOS and Windows). |
+| `just test-templates <lang> [lib\|app] [pm]` | Renders a setup-repo template, initialises it and runs its own `just check`. Needs that language's toolchain; CI runs every variant. |
+| `just evals` | Behavior evals with `claude plugin eval`. Real model calls, billed: run before releases, not on every change. Cases that use Bash need Claude Code's sandbox (Linux, macOS, WSL2). |
 
 ## Conventions (enforced by pre-commit and CI)
 
