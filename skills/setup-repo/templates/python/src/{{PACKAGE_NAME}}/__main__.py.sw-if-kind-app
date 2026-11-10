@@ -1,0 +1,12 @@
+"""Command-line entry point: ``{{PROJECT_NAME}}`` or ``python -m {{PACKAGE_NAME}}``."""
+
+from {{PACKAGE_NAME}} import greet
+
+
+def main() -> None:
+    """Print a greeting."""
+    print(greet("world"))
+
+
+if __name__ == "__main__":
+    main()

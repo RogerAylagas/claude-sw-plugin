@@ -1,0 +1,40 @@
+  conventions:
+    name: Conventions
+    # Hooks can be skipped locally, so PRs re-check branch name, PR title and commit messages.
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Branch name follows Conventional Branch
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          re='^(main|develop|(feature|feat|bugfix|fix|hotfix|release|chore)/[a-z0-9]+(\.[a-z0-9]+)*(-[a-z0-9]+(\.[a-z0-9]+)*)*)$'
+          if [[ "$BRANCH" =~ $re ]]; then
+            echo "Branch '$BRANCH' is valid."
+          else
+            echo "::error::Branch '$BRANCH' does not follow Conventional Branch: use feature/, bugfix/, hotfix/, release/ or chore/ plus a lowercase-hyphenated description (see CONTRIBUTING.md)."
+            exit 1
+          fi
+      - name: PR title and commits follow Conventional Commits
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          re='^(feat|fix|build|chore|ci|docs|style|refactor|perf|test|revert)(\([a-z0-9._/-]+\))?!?: [^[:space:]].*$'
+          status=0
+          if [[ ! "$TITLE" =~ $re ]]; then
+            echo "::error::PR title '$TITLE' is not a Conventional Commit (it becomes the squash-merge commit)."
+            status=1
+          fi
+          while IFS= read -r subject; do
+            [[ "$subject" == 'Revert "'* ]] && continue
+            if [[ ! "$subject" =~ $re ]]; then
+              echo "::error::Commit '$subject' is not a Conventional Commit."
+              status=1
+            fi
+          done < <(git log --no-merges --format=%s "$BASE_SHA..$HEAD_SHA")
+          exit "$status"

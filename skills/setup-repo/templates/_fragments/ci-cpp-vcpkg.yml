@@ -1,0 +1,13 @@
+      - name: Set up vcpkg at the manifest baseline
+        run: |
+          baseline=$(jq -r '."builtin-baseline"' vcpkg.json)
+          git init --quiet "$RUNNER_TEMP/vcpkg"
+          git -C "$RUNNER_TEMP/vcpkg" fetch --quiet --depth 1 https://github.com/microsoft/vcpkg "$baseline"
+          git -C "$RUNNER_TEMP/vcpkg" checkout --quiet FETCH_HEAD
+          "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+          echo "VCPKG_ROOT=$RUNNER_TEMP/vcpkg" >> "$GITHUB_ENV"
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/vcpkg/archives
+          key: vcpkg-${{ runner.os }}-${{ github.job }}-${{ env.CXX }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-${{ runner.os }}-${{ github.job }}-${{ env.CXX }}-

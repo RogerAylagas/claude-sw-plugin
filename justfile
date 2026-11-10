@@ -20,6 +20,10 @@ validate:
 test-hooks:
     sh tests/hooks/run.sh
 
+# Render a setup-repo template, initialise it and run its `just check` (lang: python, typescript, rust, cpp)
+test-templates lang kind="app" pm="":
+    sh tests/templates/smoke.sh {{lang}} {{kind}} {{pm}}
+
 # Update pre-commit hook versions to their latest releases
 update-hooks:
     uvx pre-commit autoupdate

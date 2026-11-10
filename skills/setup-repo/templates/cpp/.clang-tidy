@@ -1,0 +1,24 @@
+---
+# Static analysis for the project's own sources (`just analyze`). Warnings are errors.
+Checks: >
+  -*,
+  bugprone-*,
+  cert-*,
+  clang-analyzer-*,
+  concurrency-*,
+  cppcoreguidelines-*,
+  misc-*,
+  modernize-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-magic-numbers,
+  -modernize-use-trailing-return-type,
+  -readability-identifier-length,
+  -misc-include-cleaner,
+  -portability-avoid-pragma-once
+WarningsAsErrors: "*"
+HeaderFilterRegex: "(src|include)/"
+FormatStyle: file
+...

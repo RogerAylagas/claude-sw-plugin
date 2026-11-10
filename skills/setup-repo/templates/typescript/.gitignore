@@ -1,0 +1,7 @@
+# Node / TypeScript
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+# sw:include gitignore-common

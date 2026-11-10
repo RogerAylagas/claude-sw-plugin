@@ -1,0 +1,20 @@
+{
+  "name": "{{PROJECT_NAME}}",
+  "version": "0.1.0",
+  "description": "{{DESCRIPTION}}",
+  "private": true,
+  "type": "module",
+  "author": "{{AUTHOR}}",
+  "engines": {
+    "node": ">={{NODE_VERSION}}"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --max-warnings=0 .",
+    "format": "prettier --write .",
+    "test": "vitest run tests/unit --coverage",
+    "test:integration": "vitest run tests/integration"
+  }
+}

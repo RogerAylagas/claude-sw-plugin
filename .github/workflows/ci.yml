@@ -103,11 +103,52 @@ jobs:
       - name: Hook tests
         run: just test-hooks
 
+  templates:
+    name: Template (${{ matrix.lang }}, ${{ matrix.kind }}${{ matrix.pm && format(', {0}', matrix.pm) || '' }})
+    # Renders each setup-repo template, initialises it and runs its full `just check`.
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { lang: python, kind: app }
+          - { lang: python, kind: lib }
+          - { lang: typescript, kind: app, pm: pnpm }
+          - { lang: typescript, kind: lib, pm: npm }
+          - { lang: rust, kind: app }
+          - { lang: rust, kind: lib }
+          - { lang: cpp, kind: app }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: extractions/setup-just@v4
+      - uses: actions/setup-node@v7
+        if: matrix.lang == 'typescript'
+        with:
+          node-version: lts/*
+      - uses: pnpm/action-setup@v6
+        if: matrix.pm == 'pnpm'
+        with:
+          version: latest
+      - uses: dtolnay/rust-toolchain@stable
+        if: matrix.lang == 'rust'
+        with:
+          components: rustfmt, clippy
+      - name: Install clang-tidy
+        if: matrix.lang == 'cpp'
+        run: sudo apt-get update && sudo apt-get install --yes clang-tidy
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-templates-${{ runner.os }}-${{ hashFiles('skills/setup-repo/templates/**/.pre-commit-config.yaml', 'skills/setup-repo/templates/_fragments/precommit-common.yaml') }}
+      - name: Smoke test
+        run: just test-templates ${{ matrix.lang }} ${{ matrix.kind }} ${{ matrix.pm }}
+
   ci-ok:
     name: CI OK
     # Single required status check for branch protection; add new jobs to `needs`.
     if: always()
-    needs: [conventions, lint, validate, hook-tests]
+    needs: [conventions, lint, validate, hook-tests, templates]
     runs-on: ubuntu-latest
     steps:
       - name: All jobs passed or were skipped

@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+# sw:include ci-conventions.yml
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6  # sw:if pm=pnpm
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: {{PM}}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile  # sw:if pm=pnpm
+        run: npm ci  # sw:if pm=npm
+      - uses: astral-sh/setup-uv@v10.3.3
+      - uses: extractions/setup-just@v4
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: pre-commit
+        run: just lint
+        env:
+          # CI checks out main/develop on push; the branch-name hook only guards local commits.
+          SKIP: no-commit-to-branch
+
+  build-and-test:
+    name: Build & test
+    runs-on: ubuntu-latest
+    # Integration tests that need services (database, cache, ...) declare them here.
+    # services:
+    #   postgres:
+    #     image: postgres:17
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6  # sw:if pm=pnpm
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: {{PM}}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile  # sw:if pm=pnpm
+        run: npm ci  # sw:if pm=npm
+      - uses: extractions/setup-just@v4
+      - name: Type check
+        run: just analyze
+      - name: Build
+        run: just build
+      - name: Unit tests
+        run: just test
+      - name: Integration tests
+        run: just test-integration
+
+  ci-ok:
+    name: CI OK
+    # The single required status check for branch protection; add new jobs to `needs`.
+    if: always()
+    needs: [conventions, lint, build-and-test]
+    runs-on: ubuntu-latest
+    steps:
+# sw:include ci-ok.yml

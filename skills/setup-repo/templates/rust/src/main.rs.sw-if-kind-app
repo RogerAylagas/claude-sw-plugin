@@ -1,0 +1,20 @@
+//! {{DESCRIPTION}}
+
+/// Returns a greeting for `name`. Placeholder: replace with the project's real code.
+fn greet(name: &str) -> String {
+    format!("Hello, {name}!")
+}
+
+fn main() {
+    println!("{}", greet("world"));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::greet;
+
+    #[test]
+    fn greets_by_name() {
+        assert_eq!(greet("world"), "Hello, world!");
+    }
+}

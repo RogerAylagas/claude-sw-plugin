@@ -1,0 +1,13 @@
+# Quality gate. `just setup` installs it; CI runs it via `just lint`.
+# Update hook versions with `uvx pre-commit autoupdate`. clang-tidy runs in `just analyze`.
+default_install_hook_types: [pre-commit, commit-msg]
+
+repos:
+# sw:include precommit-common.yaml
+
+  # --- C++ ---
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v23.1.5
+    hooks:
+      - id: clang-format
+        types_or: [c++, c]
