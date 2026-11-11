@@ -1,7 +1,11 @@
 ## Rust
 
-- Toolchain from `rust-toolchain.toml` (stable, with rustfmt and clippy). Add dependencies with
-  `cargo add <crate>` (dev-only: `cargo add --dev <crate>`); commit `Cargo.lock`.
+- Toolchain from `rust-toolchain.toml` (a stable release at least 14 days old, with rustfmt and
+  clippy). Add dependencies with `cargo add <crate>` (dev-only: `cargo add --dev <crate>`);
+  commit `Cargo.lock`.
+- 14-day rule: `global-min-publish-age = "14 days"` in `.cargo/config.toml` (respected from
+  Cargo 1.100; older versions ignore it). Exemption, one crate at a time (the lock file keeps it):
+  `CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE=allow cargo update -p <crate> --precise <version>`.
 - Unit tests live next to the code in `#[cfg(test)] mod tests`; integration tests in `tests/*.rs`.
 - Lints: clippy `all` and `pedantic` are warnings, and CI treats warnings as errors; `unsafe` is
   forbidden. Fix lints instead of adding `#[allow(...)]`; if an allow is unavoidable, scope it

@@ -6,7 +6,7 @@
           git -C "$RUNNER_TEMP/vcpkg" checkout --quiet FETCH_HEAD
           "$RUNNER_TEMP/vcpkg/bootstrap-vcpkg.sh" -disableMetrics
           echo "VCPKG_ROOT=$RUNNER_TEMP/vcpkg" >> "$GITHUB_ENV"
-      - uses: actions/cache@v6
+      - uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/vcpkg/archives
           key: vcpkg-${{ runner.os }}-${{ github.job }}-${{ env.CXX }}-${{ hashFiles('vcpkg.json') }}

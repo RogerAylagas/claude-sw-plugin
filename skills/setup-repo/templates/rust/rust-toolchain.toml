@@ -1,3 +1,4 @@
+# Pinned to the newest Rust release that is at least 14 days old (14-day dependency rule, AGENTS.md).
 [toolchain]
-channel = "stable"
+channel = "{{RUST_VERSION}}"
 components = ["rustfmt", "clippy"]

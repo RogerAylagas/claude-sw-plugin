@@ -1,6 +1,6 @@
 # Repository setup: language-independent reference
 
-Last reviewed: 2026-11-09. Re-check tool recommendations against official docs if this is more
+Last reviewed: 2026-11-11. Re-check tool recommendations against official docs if this is more
 than six months old.
 
 ## What every repository gets
@@ -42,16 +42,43 @@ projects.
 5. Format once (`just fmt`), because line breaks depend on the project name; then run
    `just check` until it passes.
 
-## Versions: never from memory
+## Versions: never from memory, never younger than 14 days
 
-- pre-commit hooks: `uvx pre-commit autoupdate` after rendering.
-- Dev dependencies: added by the package manager (`init-project.sh`), so they resolve to the
-  latest release and are pinned in the lock file.
-- GitHub Actions: for each `uses: owner/repo@vN` in `.github/workflows/`, check the latest release
-  (`gh api repos/owner/repo/releases/latest --jq .tag_name`) and update the major version. Use a
-  full tag when the action has no floating major tag (`gh api repos/owner/repo/git/ref/tags/vN`
-  returns 404). Dependabot keeps them current afterwards.
+The 14-day rule (ADR 0002 in the sw plugin): no dependency, hook, action or toolchain release
+younger than 14 days. Malicious releases are usually found and pulled within days.
+
+- Dependencies: the package manager's own setting, rendered from the templates: uv
+  `exclude-newer`, pnpm `minimumReleaseAge`, npm `min-release-age`, Cargo
+  `global-min-publish-age`. `init-project.sh` installs the dev tools through it, so they resolve
+  to the newest release at least 14 days old and are pinned in the lock file.
+- Toolchains: `init-project.sh` pins uv and just in CI, Node (`.nvmrc`), pnpm (`packageManager`),
+  Rust (`rust-toolchain.toml`) and the vcpkg baseline with `scripts/aged-version.sh`, which prints
+  the newest release (or commit) at least 14 days old: `aged-version.sh astral-sh/uv`,
+  `--prefix v24. nodejs/node`, `--commit master microsoft/vcpkg`.
+- pre-commit hooks and GitHub Actions: keep the template versions, which are exact releases at
+  least 14 days old. Never use a floating `@vN` tag: it resolves to the newest release at run
+  time. Dependabot, with `cooldown: default-days: 14` on every ecosystem, updates them. Never
+  run `pre-commit autoupdate`.
+- Tool versions that enforce the rule: uv 0.9.17+, pnpm 10.16+, npm 11.10+, Cargo 1.100+.
+  `init-project.sh` stops on older pnpm or npm and warns on older Cargo.
+- Not covered: runner images and OS packages; packages pre-commit installs into hook
+  environments with pip.
 - Language version: see the language reference.
+
+### Urgent security fixes
+
+Dependabot's security updates skip its cooldown, but the package manager still refuses a release
+younger than 14 days. Exempt only that package, in the same PR, with a comment giving the reason
+and the date it can be removed (14 days after the release). Ask the user first, and never
+weaken the rule globally.
+
+| Tool | Exemption |
+|---|---|
+| uv | `exclude-newer-package = { <package> = false }` under `[tool.uv]` |
+| pnpm | `minimumReleaseAgeExclude: [<package>]` in `pnpm-workspace.yaml` |
+| npm (11.17+) | `min-release-age-exclude[]=<package>` in `.npmrc` |
+| Cargo | `CARGO_RESOLVER_INCOMPATIBLE_PUBLISH_AGE=allow cargo update -p <crate> --precise <version>` (one-off; `Cargo.lock` keeps it) |
+| vcpkg | an `overrides` entry in `vcpkg.json` |
 
 ## Git and GitHub, new repository
 

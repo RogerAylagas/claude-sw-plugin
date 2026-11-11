@@ -23,14 +23,16 @@ There is deliberately no `CLAUDE.md` here: a `CLAUDE.md` at a plugin root is nev
 ## Commands
 
 Use the `justfile`; CI runs the same recipes. On Windows run them from Git Bash.
-If `just` is not installed, use `uvx --from rust-just just <recipe>` (needs [uv](https://docs.astral.sh/uv/)).
+If `just` is not installed, use `uvx --exclude-newer "14 days" --from rust-just just <recipe>`
+(needs [uv](https://docs.astral.sh/uv/)).
 
 | Command | What it does |
 |---|---|
-| `just check` | Lint + validate + hook tests. Must pass before a PR. |
+| `just check` | Lint + validate + hook and script tests. Must pass before a PR. |
 | `just lint` | `pre-commit run --all-files` (formatting, YAML/JSON checks, shellcheck, secrets). |
 | `just validate` | `claude plugin validate . --strict`. |
 | `just test-hooks` | Tests for `hooks/scripts/` (CI runs them on Linux, macOS and Windows). |
+| `just test-scripts` | Tests for `skills/setup-repo/scripts/` (stubbed, plus live GitHub API checks when `gh` is authenticated). |
 | `just test-templates <lang> [lib\|app] [pm]` | Renders a setup-repo template, initialises it and runs its own `just check`. Needs that language's toolchain; CI runs every variant. |
 | `just evals` | Behavior evals with `claude plugin eval`. Real model calls, billed: run before releases, not on every change. Cases that use Bash need Claude Code's sandbox (Linux, macOS, WSL2). |
 
@@ -59,6 +61,15 @@ If `just` is not installed, use `uvx --from rust-just just <recipe>` (needs [uv]
 - The branch and commit rules are defined in `skills/conventions/SKILL.md`. If you change them,
   update every copy in the same PR: `hooks/scripts/`, the setup templates (pre-commit config and CI
   `conventions` job), and this repo's `.pre-commit-config.yaml` and `.github/workflows/ci.yml`.
-- Never write tool or action versions from memory into templates: look them up
-  (`gh api repos/<owner>/<repo>/releases/latest`, `pre-commit autoupdate`).
+- **14-day dependency rule** ([ADR 0002](docs/adr/0002-dependency-cooldown.md)): never use a
+  dependency, hook, action or toolchain release younger than 14 days, here or in the templates,
+  and never write versions from memory.
+  - Toolchains (uv, just, Node, pnpm, Rust; the pins in `.github/workflows/` and those
+    `init-project.sh` resolves): Dependabot can't update them, so refresh them by hand with
+    `sh skills/setup-repo/scripts/aged-version.sh [--prefix vN.] <owner>/<repo>`. It reads GitHub
+    *releases*, so it only works for projects that publish them.
+  - Hooks and actions: Dependabot (14-day cooldown) updates them; never run
+    `pre-commit autoupdate`. To pick a version by hand, check the tag's date
+    (`gh api repos/<owner>/<repo>/commits/<tag> --jq .commit.committer.date`). Pin actions to
+    exact releases, never floating `@vN` tags.
 - Every behavior change needs a test (hooks, scripts) or an eval case (skills).

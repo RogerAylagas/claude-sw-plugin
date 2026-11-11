@@ -20,7 +20,7 @@ owe nothing to this one. The project's own license comes from the user's choice 
 | Marker | Effect |
 |---|---|
 | `{{PROJECT_NAME}}` `{{PACKAGE_NAME}}` `{{PACKAGE_UPPER}}` `{{DESCRIPTION}}` `{{LANG}}` `{{KIND}}` `{{PM}}` `{{PYTHON_VERSION}}` `{{NODE_VERSION}}` `{{CXX_STANDARD}}` `{{LICENSE}}` `{{AUTHOR}}` `{{YEAR}}` `{{DATE}}` | Replaced in contents and in paths. `PACKAGE_NAME` is the project name with `_` instead of `-`. |
-| `{{UV_BUILD_REQ}}`, `{{VCPKG_BASELINE}}` | Left for `init-project.sh`, which resolves them from the installed tools. |
+| `{{UV_VERSION}}`, `{{JUST_VERSION}}`, `{{RUST_VERSION}}`, `{{UV_BUILD_REQ}}`, `{{VCPKG_BASELINE}}` | Left for `init-project.sh`, which resolves them to the newest releases (or vcpkg commit) at least 14 days old with `scripts/aged-version.sh`. |
 | A line containing `sw:include FILE` | Replaced by `_fragments/FILE` (`{{LANG}}` in FILE is expanded). |
 | A line ending in a comment `sw:if KEY=VALUE` (`#`, `//` or `<!-- -->`) | Kept only when KEY (`kind`, `pm`, `lang`) equals VALUE; the marker is removed. A line that is only the marker becomes a blank line. |
 | A file named `NAME.sw-if-KEY-VALUE` | Rendered as `NAME` only when KEY equals VALUE. |

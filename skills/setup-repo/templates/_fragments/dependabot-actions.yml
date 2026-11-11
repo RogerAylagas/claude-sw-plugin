@@ -3,6 +3,8 @@
     target-branch: develop
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 14
     commit-message:
       prefix: chore
       include: scope

@@ -6,7 +6,7 @@ Guidance for AI coding agents (Claude Code, Codex, Copilot, …) and humans work
 ## Commands
 
 Everything runs through the `justfile`, and CI runs the same recipes: a green `just check` locally
-means a green CI. Install just from https://just.systems (or `uv tool install rust-just`).
+means a green CI. Install just from https://just.systems (or `uv tool install --exclude-newer "14 days" rust-just`).
 
 | Command | What it does |
 |---|---|
@@ -38,6 +38,21 @@ means a green CI. Install just from https://just.systems (or `uv tool install ru
 - Commits and PR titles follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/).
   Feature PRs are squash-merged; release and hotfix PRs use merge commits.
 - Non-trivial changes start with a plan in `docs/plans/`; significant decisions get an ADR.
+
+## Dependencies: the 14-day rule
+
+Never add or update to a dependency, tool, hook or action version released less than 14 days ago.
+Malicious releases are usually found and pulled within days.
+
+- The package manager enforces it (see the language section above), and Dependabot waits 14 days
+  before proposing an update (`.github/dependabot.yml`). Never weaken or remove these settings.
+- Toolchains are pinned to releases at least 14 days old: uv and just in `.github/workflows/`,
+  plus the language toolchain above. To update one, pick the newest release that is at least
+  14 days old. Actions are pinned to exact releases, never to a floating `@vN` tag.
+- Don't run `pre-commit autoupdate`: it ignores release age. Dependabot updates the hooks.
+- Urgent security fix for a release younger than 14 days: exempt only that package (syntax above),
+  with a comment giving the reason and the date it can be removed, and only with the
+  maintainers' approval. Remove the exemption once the release is 14 days old.
 
 ## Rules for agents
 

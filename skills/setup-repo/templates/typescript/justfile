@@ -8,7 +8,7 @@ default:
 # Install dependencies and git hooks (run once after cloning)
 setup:
     {{PM}} install
-    uvx pre-commit install
+    uvx --exclude-newer "14 days" pre-commit install
 
 # Format code
 fmt:
@@ -16,7 +16,7 @@ fmt:
 
 # All pre-commit hooks on all files (prettier, eslint, file checks, secrets)
 lint:
-    uvx pre-commit run --all-files --show-diff-on-failure
+    uvx --exclude-newer "14 days" pre-commit run --all-files --show-diff-on-failure
 
 # Static type checks (tsc)
 analyze:

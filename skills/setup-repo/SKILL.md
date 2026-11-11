@@ -13,8 +13,9 @@ Paths below are relative to `${CLAUDE_PLUGIN_ROOT}/skills/setup-repo/`. Read
 `${CLAUDE_PLUGIN_ROOT}/skills/conventions/SKILL.md`.
 
 Principles: ask before choosing anything the user would care about; never overwrite their files
-without showing a diff; never write tool versions from memory; confirm before anything that
-leaves the machine.
+without showing a diff; never write tool versions from memory, and never use a release younger
+than 14 days (the 14-day rule, "Versions" in `reference/generic.md`); confirm before anything
+that leaves the machine.
 
 ## Step 1: Inspect
 
@@ -23,9 +24,10 @@ Run read-only checks and summarise the findings in a short table:
 - Is this a git repository? Any commits? Current branch? Is there a remote (`git remote -v`)?
 - Languages present (`pyproject.toml`, `package.json`, `Cargo.toml`, `CMakeLists.txt`, ...).
 - Which items from the checklist in `reference/generic.md` already exist.
-- Tools available: `git`, `gh` (`gh auth status`), `uv`, `just`, and the language's tools
-  (`node`/`pnpm`, `cargo`, `cmake`/`VCPKG_ROOT`). Note what's missing and how to install it; don't
-  install system tools without asking.
+- Tools available: `git`, `gh` (`gh auth status`; `init-project.sh` needs it to look up release
+  dates), `uv`, `just`, and the language's tools (`node`/`pnpm`, `cargo`, `cmake`/`VCPKG_ROOT`).
+  Note what's missing and how to install it; don't install system tools without asking. Versions
+  that enforce the 14-day rule: uv 0.9.17+, pnpm 10.16+, npm 11.10+, Cargo 1.100+.
 - With a GitHub remote: default branch, whether `develop` exists, branch protection
   (`gh api repos/<o>/<r>/branches/<b>/protection`, 404 = none).
 
@@ -80,14 +82,18 @@ sh "${CLAUDE_PLUGIN_ROOT}/skills/setup-repo/scripts/init-project.sh" \
   --lang <lang> --dir <repo> --kind <lib|app> --pm <pm> --name <name>
 ```
 
-It installs the dev tools at their latest versions through the package manager and creates the
-lock file. If it reports an existing manifest, merge the printed fragment by hand.
+It installs the dev tools through the package manager, whose rendered setting skips releases
+younger than 14 days, creates the lock file, and pins the toolchains (uv and just in CI, Node,
+pnpm, Rust, the vcpkg baseline) to the newest releases at least 14 days old. It stops if pnpm or
+npm is too old to enforce the rule. If it reports an existing manifest, merge the printed
+fragment by hand.
 
-## Step 6: Pin current versions
+## Step 6: Check the version pins
 
-- `uvx pre-commit autoupdate` (or `uv run pre-commit autoupdate` in Python projects).
-- For each GitHub Action in `.github/workflows/*.yml`, check the latest release as described in
-  `reference/generic.md` and update the version if it is newer.
+Don't run `pre-commit autoupdate` and don't move actions to their latest release: both ignore
+the 14-day rule. The templates ship hook revs and exact action releases at least 14 days old, and
+Dependabot updates them after its cooldown. Note the pins `init-project.sh` chose for the report,
+and pass on any warning it printed (for example, Cargo older than 1.100 ignoring the rule).
 
 ## Step 7: Verify locally
 
@@ -98,7 +104,7 @@ git add -A
 SKIP=no-commit-to-branch just check   # SKIP only while still on main/develop before the first commit
 ```
 
-If `just` isn't installed, use `uvx --from rust-just just`. Fix failures in the generated files
+If `just` isn't installed, use `uvx --exclude-newer "14 days" --from rust-just just`. Fix failures in the generated files
 until `just check` passes; never by disabling a check.
 
 Then fill in project-specific details: the layout notes in AGENTS.md and the README description.

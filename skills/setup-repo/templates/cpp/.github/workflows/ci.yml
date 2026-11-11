@@ -21,10 +21,14 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
-      - uses: extractions/setup-just@v4
-      - uses: actions/cache@v6
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.3.2
+        with:
+          version: "{{UV_VERSION}}"
+      - uses: extractions/setup-just@v4.0.0
+        with:
+          just-version: "{{JUST_VERSION}}"
+      - uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -52,9 +56,11 @@ jobs:
     #   postgres:
     #     image: postgres:17
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 # sw:include ci-cpp-vcpkg.yml
-      - uses: extractions/setup-just@v4
+      - uses: extractions/setup-just@v4.0.0
+        with:
+          just-version: "{{JUST_VERSION}}"
       - name: Build
         run: just build
       - name: Unit tests
@@ -68,11 +74,13 @@ jobs:
     env:
       CXX: clang++
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
       - name: Install clang-tidy
         run: sudo apt-get update && sudo apt-get install --yes clang-tidy
 # sw:include ci-cpp-vcpkg.yml
-      - uses: extractions/setup-just@v4
+      - uses: extractions/setup-just@v4.0.0
+        with:
+          just-version: "{{JUST_VERSION}}"
       - name: clang-tidy
         run: just analyze
 
@@ -82,9 +90,11 @@ jobs:
     env:
       CXX: clang++
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 # sw:include ci-cpp-vcpkg.yml
-      - uses: extractions/setup-just@v4
+      - uses: extractions/setup-just@v4.0.0
+        with:
+          just-version: "{{JUST_VERSION}}"
       - name: Build and test with sanitizers
         run: just sanitize
 
