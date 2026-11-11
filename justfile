@@ -6,7 +6,7 @@ default:
     @just --list
 
 # Everything CI runs. Must pass before opening a PR.
-check: lint validate test-hooks
+check: lint validate test-hooks test-scripts
 
 # Formatting, file checks, shellcheck, secret scan
 lint:
@@ -19,6 +19,10 @@ validate:
 # Hook script tests (plan gate and session context)
 test-hooks:
     sh tests/hooks/run.sh
+
+# setup-repo script tests (live GitHub API checks need an authenticated gh)
+test-scripts:
+    sh tests/scripts/run.sh
 
 # Render a setup-repo template, initialise it and run its `just check` (lang: python, typescript, rust, cpp)
 test-templates lang kind="app" pm="":

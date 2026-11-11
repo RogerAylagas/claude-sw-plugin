@@ -103,6 +103,24 @@ jobs:
       - name: Hook tests
         run: just test-hooks
 
+  script-tests:
+    name: Script tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - uses: extractions/setup-just@v4
+      - name: Script tests
+        run: just test-scripts
+        env:
+          GH_TOKEN: ${{ github.token }}
+
   templates:
     name: Template (${{ matrix.lang }}, ${{ matrix.kind }}${{ matrix.pm && format(', {0}', matrix.pm) || '' }})
     # Renders each setup-repo template, initialises it and runs its full `just check`.
@@ -148,7 +166,7 @@ jobs:
     name: CI OK
     # Single required status check for branch protection; add new jobs to `needs`.
     if: always()
-    needs: [conventions, lint, validate, hook-tests, templates]
+    needs: [conventions, lint, validate, hook-tests, script-tests, templates]
     runs-on: ubuntu-latest
     steps:
       - name: All jobs passed or were skipped
