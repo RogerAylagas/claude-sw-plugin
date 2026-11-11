@@ -1,10 +1,12 @@
 #!/bin/sh
-# Tests for skills/setup-repo/scripts (aged-version.sh, init-project.sh version checks).
+# Tests for skills/setup-repo/scripts (aged-version.sh, init-project.sh version checks) and for
+# the changelog layout of both cliff.toml files.
 # Usage: sh tests/scripts/run.sh   (POSIX sh; on Windows run from Git Bash)
 #
 # Offline tests put stub `gh`, `pnpm`, `npm` and `cargo` commands first on PATH. Live tests query
 # the GitHub API at a fixed past date, so their answers never change; they need an authenticated
-# `gh` (GH_TOKEN in CI) and are skipped locally without one.
+# `gh` (GH_TOKEN in CI) and are skipped locally without one. The changelog tests run git-cliff
+# with `uvx` and are skipped locally without it.
 set -u
 
 top=$(CDPATH='' cd -- "$(dirname -- "$0")/../.." && pwd)
@@ -208,6 +210,61 @@ elif [ -n "${CI:-}" ]; then
 else
     skipped=$((skipped + 1))
     printf 'skip aged-version (live): gh is not authenticated\n'
+fi
+
+# --- cliff.toml: changelog layout (this repository's and the setup template's) -------------
+
+# git-cliff must write one header, a blank line before every release heading and one newline at
+# the end (pre-commit's end-of-file fixer rejects more), for a new changelog and when the
+# release flow prepends a release to an existing one.
+changelog_layout() { # NAME FILE
+    _bad=$(awk '
+        /^# Changelog$/ { headers++ }
+        /^## \[/ { releases++; if (prev != "") print "no blank line before line " NR ": " $0 }
+        { prev = $0 }
+        END {
+            if (headers != 1) print headers + 0 " \"# Changelog\" headers, expected 1"
+            if (releases != 2) print releases + 0 " releases, expected 2"
+            if (prev == "") print "blank line at the end of the file"
+        }' "$2")
+    [ -n "$(tail -c 1 "$2")" ] && _bad="$_bad no newline at the end of the file"
+    if [ -n "$_bad" ]; then
+        not_ok "$1" "$_bad"
+    else
+        ok "$1"
+    fi
+}
+if command -v uvx >/dev/null 2>&1; then
+    repo=$(project changelog)
+    g() {
+        git -C "$repo" -c init.defaultBranch=main -c user.name=test -c user.email=test@example.invalid \
+            -c core.hooksPath="$work/no-hooks" "$@"
+    }
+    if ! { g init -q && g commit -q --allow-empty -m "feat: first feature" && g tag v0.1.0 &&
+        g commit -q --allow-empty -m "fix: first fix"; }; then
+        not_ok "changelog: test repository" "git failed"
+    fi
+    for config in "$top/cliff.toml" "$top/skills/setup-repo/templates/common/cliff.toml"; do
+        name=${config#"$top/"}
+        cliff() { # ARGS... (in the test repository, with this config)
+            (cd "$repo" && uvx --exclude-newer "14 days" git-cliff --config "$config" "$@") \
+                >"$work/cliff.log" 2>&1 || {
+                not_ok "$name: git-cliff $*" "$(cat "$work/cliff.log")"
+                return 1
+            }
+        }
+        rm -f "$repo/CHANGELOG.md"
+        cliff --tag v0.2.0 --output CHANGELOG.md &&
+            changelog_layout "$name: new changelog" "$repo/CHANGELOG.md"
+        rm -f "$repo/CHANGELOG.md"
+        cliff --latest --output CHANGELOG.md && cliff --unreleased --tag v0.2.0 --prepend CHANGELOG.md &&
+            changelog_layout "$name: release prepended to a changelog" "$repo/CHANGELOG.md"
+    done
+elif [ -n "${CI:-}" ]; then
+    not_ok "changelog" "uvx is not installed in CI: add astral-sh/setup-uv to this job"
+else
+    skipped=$((skipped + 1))
+    printf 'skip changelog: uvx is not installed\n'
 fi
 
 printf '\n%s passed, %s failed, %s skipped\n' "$passed" "$failed" "$skipped"

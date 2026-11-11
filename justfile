@@ -20,7 +20,7 @@ validate:
 test-hooks:
     sh tests/hooks/run.sh
 
-# setup-repo script tests (live GitHub API checks need an authenticated gh)
+# setup-repo script and changelog tests (live GitHub API checks need an authenticated gh)
 test-scripts:
     sh tests/scripts/run.sh
 
