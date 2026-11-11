@@ -92,7 +92,7 @@ case "$lang" in
         need uv
         v=$(uv --version | awk '{ print $2 }')
         version_at_least "$v" 0.9.17 ||
-            die "uv $v can't read exclude-newer = \"14 days\" (the 14-day rule) and would skip it; update uv to 0.9.17 or newer (uv self update) and run again"
+            die "uv $v can't read exclude-newer = \"14 days\" (the 14-day rule) and would skip it; update uv to the newest release at least 14 days old (uv self update \$(sh $here/aged-version.sh astral-sh/uv), or through the package manager that installed it) and run again"
         ;;
     typescript)
         pm=${pm:-pnpm}

@@ -22,7 +22,7 @@ Shared rules: `${CLAUDE_PLUGIN_ROOT}/skills/conventions/SKILL.md`.
 
 ## Step 2: Local gate
 
-Run `just check` (or the commands in AGENTS.md / CI). It must pass before review.
+Run `just check` (without `just` installed: `uvx --exclude-newer "14 days" --from rust-just just check`; without a justfile: the commands in AGENTS.md / CI). It must pass before review.
 
 ## Step 3: Independent review
 

@@ -64,7 +64,7 @@ reveals.
 
 ## Step 6: Verify
 
-Run the full gate: `just check` (or the commands in AGENTS.md / CI). Never skip, weaken or delete
+Run the full gate: `just check` (without `just` installed: `uvx --exclude-newer "14 days" --from rust-just just check`; without a justfile: the commands in AGENTS.md / CI). Never skip, weaken or delete
 tests or checks to get it green.
 
 ## Step 7: Commit

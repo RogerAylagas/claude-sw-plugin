@@ -6,7 +6,10 @@ Guidance for AI coding agents (Claude Code, Codex, Copilot, …) and humans work
 ## Commands
 
 Everything runs through the `justfile`, and CI runs the same recipes: a green `just check` locally
-means a green CI. Install just from https://just.systems (or `uv tool install --exclude-newer "14 days" rust-just`).
+means a green CI. Install just from https://just.systems (or
+`uv tool install --exclude-newer "14 days" rust-just`). Without `just` installed, run any recipe
+with `uvx --exclude-newer "14 days" --from rust-just just <recipe>`; don't run the recipes'
+commands by hand.
 
 | Command | What it does |
 |---|---|
