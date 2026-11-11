@@ -30,9 +30,11 @@ plan limitation, the generated AGENTS.md only says how to install `just`, and im
 doesn't mention acceptance criteria.
 
 ## Acceptance criteria
-- [ ] Given a free personal GitHub plan (`gh api user --jq .plan.name` = `free`), when the user picks
-      a private repository, then setup-repo says before creating it that branch protection won't be
-      available, and offers public, or private without protection.
+- [ ] Given setup-repo asks whether the new repository is public or private, then the private
+      option says that branch protection on private repositories needs a paid GitHub plan (Pro,
+      Team or Enterprise), naming the account's plan when `gh api user --jq .plan.name` returns one
+      (it is `null` for tokens without the `user` scope, so it can't be relied on). If protection
+      then fails with HTTP 403, the report says why and what would enable it.
 - [ ] Given a local uv older than the newest uv release at least 14 days old, when setup-repo
       inspects the tools, then it offers `uv self update <that version>`, never a plain
       `uv self update` (which would install a release younger than 14 days).
@@ -45,7 +47,7 @@ doesn't mention acceptance criteria.
 
 ## Out of scope
 - Installing anything without the user's approval.
-- Organisation plans (`gh api orgs/<org> --jq .plan.name`): only the personal-account case was seen.
+- Detecting the plan reliably: `plan` is only returned to tokens with the `user` scope.
 
 ## Changes
 | File | Change |
@@ -64,7 +66,7 @@ doesn't mention acceptance criteria.
 
 ## Steps
 - [x] `docs(plans): add plan for the end-to-end trial findings`
-- [ ] `test(evals): check that implement ticks acceptance criteria`: the eval case
+- [x] `test(evals): check that implement ticks acceptance criteria`: the eval case
 - [ ] `fix(implement): tick verified acceptance criteria and know the just fallback`
 - [ ] `fix(setup-repo): warn about protection on free private repos, offer uv and just`
 
