@@ -9,7 +9,8 @@ disable-model-invocation: true
 
 Shared rules: `${CLAUDE_PLUGIN_ROOT}/skills/conventions/SKILL.md`.
 Changelog and version come from git-cliff with the repository's `cliff.toml`. Run it as
-`uvx git-cliff` (or `npx git-cliff`, or an installed `git-cliff`).
+`uvx --exclude-newer "14 days" git-cliff` (or an installed `git-cliff`), so a release younger than
+14 days is never used.
 
 Pick the mode from the argument, or from the situation:
 

@@ -1,11 +1,12 @@
 # TypeScript / JavaScript reference
 
-Last reviewed: 2026-11-09.
+Last reviewed: 2026-11-11.
 
 | Concern | Default | Alternatives (ask) | Notes |
 |---|---|---|---|
-| Package manager | **pnpm** | npm (templates exist), bun, yarn | pnpm: fast, strict dependency isolation, `pnpm-lock.yaml`; pinned through `packageManager` in package.json. |
-| Node version | current Active LTS | | Check https://nodejs.org/en/about/previous-releases; written to `.nvmrc` and `engines`. |
+| Package manager | **pnpm** | npm (templates exist), bun, yarn | pnpm: fast, strict dependency isolation, `pnpm-lock.yaml`; pinned through `packageManager` in package.json to the newest release of the installed major at least 14 days old. |
+| Node version | current Active LTS | | Check https://nodejs.org/en/about/previous-releases. The major goes into `engines`; `.nvmrc` gets the newest release of that major at least 14 days old. |
+| 14-day rule | pnpm `minimumReleaseAge: 20160` (`pnpm-workspace.yaml`), npm `min-release-age=14` (`.npmrc`) | — | Needs pnpm 10.16+ / npm 11.10+, which `init-project.sh` checks: older versions ignore the setting silently. See "Versions" in `generic.md`. |
 | Module system | ESM, `"module": "nodenext"` | | Relative imports end in `.js`. |
 | Type checker | **tsc --noEmit**, `strict` + `noUncheckedIndexedAccess` | | Build uses `tsconfig.build.json` (src only). |
 | Linter | **ESLint** flat config + typescript-eslint `strictTypeChecked` | Biome | Ask. For Biome: drop eslint/prettier, add `@biomejs/biome`, a `biome.json`, and point the pre-commit hook and scripts at `biome check`. |

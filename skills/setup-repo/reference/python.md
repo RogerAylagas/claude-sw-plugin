@@ -1,11 +1,12 @@
 # Python reference
 
-Last reviewed: 2026-11-09.
+Last reviewed: 2026-11-11.
 
 | Concern | Default | Alternatives (ask) | Notes |
 |---|---|---|---|
 | Dependency manager | **uv** | Poetry, PDM, pip-tools | uv is fast, manages Python versions, lock file `uv.lock`, standard `pyproject.toml`. Templates exist only for uv; for another choice, render with uv and translate the commands. |
-| Build backend | `uv_build` | hatchling, setuptools | Bounds set from the installed uv version, like `uv init` does. |
+| Build backend | `uv_build` | hatchling, setuptools | Bounds set from the newest uv release at least 14 days old (the same uv CI pins), like `uv init` does for its own version. |
+| 14-day rule | `[tool.uv] exclude-newer = "14 days"` | — | Covers `uv add`, `uv lock` and transitive dependencies; needs uv 0.9.17+. See "Versions" in `generic.md`. |
 | Layout | `src/<package>/` | flat layout | src layout keeps tests honest (they import the installed package). |
 | Formatter + linter | **ruff** (`ruff format`, `ruff check`) | — | Replaces black, isort, flake8, pyupgrade, bandit subsets. |
 | Type checker | **mypy --strict** | pyright / basedpyright, ty | Ask; for pyright, replace the `analyze` recipe and the `[tool.mypy]` table. |

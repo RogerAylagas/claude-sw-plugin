@@ -1,6 +1,6 @@
 # C++ reference
 
-Last reviewed: 2026-11-09.
+Last reviewed: 2026-11-11.
 
 | Concern | Default | Alternatives (ask) | Notes |
 |---|---|---|---|
@@ -25,7 +25,10 @@ Last reviewed: 2026-11-09.
 
 - `VCPKG_ROOT` must point at a vcpkg clone on developer machines; CI fetches vcpkg at the exact
   `builtin-baseline` commit and caches binary packages.
-- Update the baseline (all ports at once) with `vcpkg x-update-baseline`, as its own commit.
+- The baseline (all ports at once) follows the 14-day rule: `init-project.sh` sets it to the
+  newest `microsoft/vcpkg` commit at least 14 days old, and Dependabot (`vcpkg` ecosystem) moves
+  it after its cooldown. By hand, use `aged-version.sh --commit master microsoft/vcpkg`, as its own
+  commit; never `vcpkg x-update-baseline`, which jumps to the newest commit.
 
 ## Retrofit notes
 

@@ -39,6 +39,21 @@ means a green CI. Install just from https://just.systems (or `uv tool install ru
   Feature PRs are squash-merged; release and hotfix PRs use merge commits.
 - Non-trivial changes start with a plan in `docs/plans/`; significant decisions get an ADR.
 
+## Dependencies: the 14-day rule
+
+Never add or update to a dependency, tool, hook or action version released less than 14 days ago.
+Malicious releases are usually found and pulled within days.
+
+- The package manager enforces it (see the language section above), and Dependabot waits 14 days
+  before proposing an update (`.github/dependabot.yml`). Never weaken or remove these settings.
+- Toolchains are pinned to releases at least 14 days old: uv and just in `.github/workflows/`,
+  plus the language toolchain above. To update one, pick the newest release that is at least
+  14 days old. Actions are pinned to exact releases, never to a floating `@vN` tag.
+- Don't run `pre-commit autoupdate`: it ignores release age. Dependabot updates the hooks.
+- Urgent security fix for a release younger than 14 days: exempt only that package (syntax above),
+  with a comment giving the reason and the date it can be removed, and only with the
+  maintainers' approval. Remove the exemption once the release is 14 days old.
+
 ## Rules for agents
 
 - Read the relevant code and tests before changing anything; reuse existing helpers.

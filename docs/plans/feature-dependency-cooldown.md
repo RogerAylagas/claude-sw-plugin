@@ -98,10 +98,11 @@ have no native setting.
 | `templates/*/.github/workflows/ci.yml` | edit | `setup-uv` `version`, `setup-just` `just-version`; Rust installs the pinned toolchain with `rustup` instead of `dtolnay/rust-toolchain@stable` (AC 8) |
 | `templates/{cpp,rust,typescript}/justfile` | edit | `uvx --exclude-newer "14 days" pre-commit` (AC 8) |
 | `templates/*/.github/dependabot.yml`, `_fragments/dependabot-actions.yml`, `_fragments/dependabot-precommit.yml` (new) | edit / new | `cooldown`, `pre-commit` entry, `vcpkg` entry for C++ (AC 8) |
-| `templates/**` and `_fragments/**` hook revs and action tags | edit | Downgrade any version younger than 14 days (AC 10) |
+| `templates/**` and `_fragments/**` hook revs and action tags | edit | Downgrade any version younger than 14 days; pin floating `@vN` action tags to exact releases (AC 10) |
 | `templates/*/.pre-commit-config.yaml` | edit | Header comment: Dependabot updates the revs, don't run `autoupdate` (AC 9) |
 | `templates/common/AGENTS.md`, `_fragments/agents-*.md`, `_fragments/contributing-*.md` | edit | State the rule, the exemption syntax per tool and how to update toolchain pins (AC 9) |
 | `skills/setup-repo/SKILL.md`, `reference/{generic,python,typescript,rust,cpp}.md`, `templates/README.md` | edit | Step 6 becomes "check the pins"; versions section explains the rule, the pins and exemptions; `uvx` fallback gets `--exclude-newer` (AC 9-10) |
+| `skills/release/SKILL.md` | edit | Added during implementation: it ran `uvx git-cliff` / `npx git-cliff`, which fetch the newest release (AC 10) |
 | `tests/scripts/run.sh` | new | Offline tests with stub `gh`/`pnpm`/`npm`/`cargo` on `PATH`, plus live `aged-version.sh` tests at a fixed `SW_NOW` (AC 1-2, 5-6) |
 | `justfile`, `.github/workflows/ci.yml` | edit | `test-scripts` recipe and CI job (with `GH_TOKEN`, added to `CI OK`) in step 3; `GH_TOKEN` for the templates job in step 4 |
 | `.github/workflows/evals.yml`, `.github/dependabot.yml`, `.pre-commit-config.yaml` | edit | This repo's own tools (AC 10) |
@@ -114,6 +115,10 @@ have no native setting.
 - Toolchain pins are resolved at setup time by `aged-version.sh` instead of hard-coding versions
   in templates: templates stay version-free for toolchains, and every new project starts from the
   newest eligible release.
+- Actions are pinned to exact releases (`actions/checkout@v7.0.1`), not floating major tags
+  (`@v7`): a major tag resolves to the newest release in that major at run time, which can be
+  hours old. Dependabot updates exact tags after its cooldown. (Clarified during implementation;
+  needed for AC 8 and 10 to hold.)
 - Release lines: "newest" means newest by publish date within a tag prefix. pnpm uses the
   installed major as the prefix (pnpm ships patches for older majors), Node the chosen major;
   uv, just and Rust publish a single line.
@@ -166,7 +171,7 @@ releases is the intended cost; security fixes skip it through Dependabot or an e
 - [x] `feat(setup-repo): add Dependabot cooldown and pre-commit updates`: Dependabot templates and
       fragments, pre-commit config comments, downgrade template revs and action tags younger than
       14 days; tests: `just lint` schema check, smoke
-- [ ] `docs(setup-repo): document the 14-day rule and exemptions`: `SKILL.md`, references,
+- [x] `docs(setup-repo): document the 14-day rule and exemptions`: `SKILL.md`, references,
       `templates/README.md`, AGENTS and CONTRIBUTING fragments
 - [ ] `ci: apply the 14-day rule to this repository`: `.github/`, `justfile`,
       `.pre-commit-config.yaml`, `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `docs/design.md`
