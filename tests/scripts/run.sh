@@ -46,7 +46,7 @@ expect() { # NAME EXPECTED_RC PATTERN  (after `run`)
 
 # Stub commands: STUB_<NAME>_OUT is printed, STUB_<NAME>_RC is the exit code.
 mkdir -p "$work/bin"
-for cmd in gh pnpm npm cargo rustup; do
+for cmd in gh pnpm npm cargo rustup uv; do
     upper=$(printf '%s' "$cmd" | tr '[:lower:]' '[:upper:]')
     cat >"$work/bin/$cmd" <<EOF
 #!/bin/sh
@@ -138,8 +138,13 @@ run env PATH="$stub_path" STUB_PNPM_OUT=10.16.0 STUB_GH_OUT='2026-01-01T00:00:00
 expect "init-project: pnpm 10.16 is accepted" 0 "typescript project initialised"
 gh_calls=$(calls gh)
 case "$gh_calls" in
-    *'startswith(\"v10.\")'* | *'startswith("v10.")'*) ok "init-project: pnpm is pinned within the installed major" ;;
+    *'startswith("v10.")'*) ok "init-project: pnpm is pinned within the installed major" ;;
     *) not_ok "init-project: pnpm is pinned within the installed major" "gh calls: $gh_calls" ;;
+esac
+case "$gh_calls" in
+    *'startswith("v24.")'*'nodejs/node'* | *'nodejs/node'*'startswith("v24.")'*)
+        ok "init-project: Node is pinned within the .nvmrc major" ;;
+    *) not_ok "init-project: Node is pinned within the .nvmrc major" "gh calls: $gh_calls" ;;
 esac
 case "$(calls npm)" in
     *'pkg set packageManager=pnpm@10.20.0'*) ok "init-project: packageManager names the aged pnpm release" ;;
@@ -150,6 +155,10 @@ if [ "$(cat "$dir/.nvmrc")" = 10.20.0 ]; then
 else
     not_ok "init-project: a major-only .nvmrc becomes the aged exact version" ".nvmrc: $(cat "$dir/.nvmrc")"
 fi
+
+dir=$(project uv-old)
+run env PATH="$stub_path" STUB_UV_OUT='uv 0.9.16 (abc123 2025-12-01)' sh "$init" --lang python --dir "$dir"
+expect "init-project: uv older than 0.9.17 stops before installing" 1 "uv 0.9.16 can't read exclude-newer"
 
 dir=$(project rust-old)
 printf '[toolchain]\nchannel = "{{RUST_VERSION}}"\n' >"$dir/rust-toolchain.toml"

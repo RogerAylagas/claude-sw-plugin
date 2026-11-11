@@ -58,7 +58,9 @@ has() { # FILE TEXT
     grep -qF -- "$2" "$1" 2>/dev/null || fail "$1 does not contain: $2"
 }
 semver='[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'
-grep -q "version: \"$semver\"" .github/workflows/ci.yml || fail "CI does not pin uv to an exact version"
+# Anchored, so `just-version:` doesn't count as setup-uv's `version:`.
+grep -qE '^[[:space:]]+version: "[0-9]+\.[0-9]+\.[0-9]+"' .github/workflows/ci.yml ||
+    fail "CI does not pin uv to an exact version"
 grep -q "just-version: \"$semver\"" .github/workflows/ci.yml || fail "CI does not pin just to an exact version"
 [ "$lang" = python ] || has justfile 'uvx --exclude-newer "14 days" pre-commit'
 ecosystems=$(grep -c 'package-ecosystem:' .github/dependabot.yml)

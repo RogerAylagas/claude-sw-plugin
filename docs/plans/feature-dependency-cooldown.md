@@ -2,7 +2,7 @@
 title: Never use a dependency or tool released less than 14 days ago
 type: feature
 branch: feature/dependency-cooldown
-status: in-progress
+status: done
 integration_tests: required
 ---
 
@@ -25,39 +25,39 @@ the schema in check-jsonschema 0.39.0 accepts all three). vcpkg, pre-commit and 
 have no native setting.
 
 ## Acceptance criteria
-- [ ] Given `aged-version.sh OWNER/REPO`, when it runs, then it prints the newest non-draft,
+- [x] Given `aged-version.sh OWNER/REPO`, when it runs, then it prints the newest non-draft,
       non-prerelease release published at least 14 days ago, without a leading `v`; `--prefix P`
       keeps only tags starting with `P`; `--commit BRANCH` prints the newest commit on `BRANCH`
       at least 14 days old; `--days N` changes the age; `SW_NOW=<epoch seconds>` replaces the
       current time (for reproducible tests).
-- [ ] Given no matching release or a failing `gh` call, when `aged-version.sh` runs, then it exits
+- [x] Given no matching release or a failing `gh` call, when `aged-version.sh` runs, then it exits
       non-zero with a message naming the repository.
-- [ ] Given a generated Python project, then `pyproject.toml` has `[tool.uv] exclude-newer =
+- [x] Given a generated Python project, then `pyproject.toml` has `[tool.uv] exclude-newer =
       "14 days"`, `uv.lock` records the 14-day span, and the `uv_build` lower bound is a uv
       release at least 14 days old.
-- [ ] Given a generated TypeScript project, then with pnpm `pnpm-workspace.yaml` sets
+- [x] Given a generated TypeScript project, then with pnpm `pnpm-workspace.yaml` sets
       `minimumReleaseAge: 20160` and `packageManager` names the newest release of the installed
       pnpm major that is at least 14 days old; with npm `.npmrc` sets `min-release-age=14`; and
       `.nvmrc` holds the newest release of the chosen Node major that is at least 14 days old
       (`@types/node` still uses the major).
-- [ ] Given a `pnpm` older than 10.16 or an `npm` older than 11.10 on `PATH`, when
+- [x] Given a `pnpm` older than 10.16 or an `npm` older than 11.10 on `PATH`, when
       `init-project.sh` runs, then it stops before any install with a message naming the version
       needed (both tools silently ignore the setting otherwise).
-- [ ] Given a generated Rust project, then `.cargo/config.toml` sets `global-min-publish-age =
+- [x] Given a generated Rust project, then `.cargo/config.toml` sets `global-min-publish-age =
       "14 days"` and `rust-toolchain.toml` pins the newest Rust release at least 14 days old; when
       the `cargo` that runs in the project reports a version older than 1.100, `init-project.sh`
       prints a warning that Cargo ignores the setting.
-- [ ] Given a generated C++ project, then `builtin-baseline` is the newest `microsoft/vcpkg`
+- [x] Given a generated C++ project, then `builtin-baseline` is the newest `microsoft/vcpkg`
       `master` commit at least 14 days old.
-- [ ] Given any generated project, then its CI installs uv and just at pinned versions at least
+- [x] Given any generated project, then its CI installs uv and just at pinned versions at least
       14 days old, `just` recipes run `uvx --exclude-newer "14 days"`, and `dependabot.yml` sets
       `cooldown: default-days: 14` on every ecosystem, including `pre-commit` (and `vcpkg` for C++).
-- [ ] Given `/sw:setup-repo`, then it no longer runs `pre-commit autoupdate` or picks the latest
+- [x] Given `/sw:setup-repo`, then it no longer runs `pre-commit autoupdate` or picks the latest
       action releases, and the generated AGENTS.md states the rule and how to add a per-package
       exemption for an urgent security fix.
-- [ ] Given this repository, then Dependabot has a 14-day cooldown and a `pre-commit` entry; CI
+- [x] Given this repository, then Dependabot has a 14-day cooldown and a `pre-commit` entry; CI
       pins uv, just, Node and pnpm to releases at least 14 days old and installs Claude Code with
-      `npm install --before`; `just update-hooks` is gone; every hook rev and action version in
+      `npm install --min-release-age=14` (Node 24.22.1 bundles npm 11.19.1); `just update-hooks` is gone; every hook rev and action version in
       this repo **and in `skills/setup-repo/templates/`** is at least 14 days old; and the rules in
       `AGENTS.md`, `skills/setup-repo/reference/generic.md` and `docs/design.md` say how to pick
       versions under the rule (`aged-version.sh`), with `--exclude-newer` on every `uvx` fallback.
@@ -182,3 +182,7 @@ releases is the intended cost; security fixes skip it through Dependabot or an e
   would have to create real GitHub repositories. Plan-critic finding accepted as a known gap.
 - Plan-critic (2026-11-11): REVISE with 9 findings; all applied above. npm in CI and the
   Dependabot schema were checked and are fine (see Context).
+- Code review (2026-11-11): APPROVE with 7 minor findings, all fixed in the last commit. The
+  TypeScript peer range now comes from the installed typescript-eslint (`npm view` ignores
+  `min-release-age`), init-project.sh checks uv 0.9.17+, and the just install hints and AGENTS.md
+  wording follow the rule.

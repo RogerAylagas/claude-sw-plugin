@@ -63,9 +63,13 @@ If `just` is not installed, use `uvx --exclude-newer "14 days" --from rust-just 
   `conventions` job), and this repo's `.pre-commit-config.yaml` and `.github/workflows/ci.yml`.
 - **14-day dependency rule** ([ADR 0002](docs/adr/0002-dependency-cooldown.md)): never use a
   dependency, hook, action or toolchain release younger than 14 days, here or in the templates,
-  and never write versions from memory. Find the newest eligible release with
-  `sh skills/setup-repo/scripts/aged-version.sh [--prefix vN.] <owner>/<repo>`. Pin actions to
-  exact releases, never floating `@vN` tags. Dependabot (14-day cooldown) updates hooks and
-  actions; never run `pre-commit autoupdate`. The toolchain pins in `.github/workflows/` (uv, just,
-  Node, pnpm) have no Dependabot support: refresh them by hand with `aged-version.sh`.
+  and never write versions from memory.
+  - Toolchains (uv, just, Node, pnpm, Rust; the pins in `.github/workflows/` and those
+    `init-project.sh` resolves): Dependabot can't update them, so refresh them by hand with
+    `sh skills/setup-repo/scripts/aged-version.sh [--prefix vN.] <owner>/<repo>`. It reads GitHub
+    *releases*, so it only works for projects that publish them.
+  - Hooks and actions: Dependabot (14-day cooldown) updates them; never run
+    `pre-commit autoupdate`. To pick a version by hand, check the tag's date
+    (`gh api repos/<owner>/<repo>/commits/<tag> --jq .commit.committer.date`). Pin actions to
+    exact releases, never floating `@vN` tags.
 - Every behavior change needs a test (hooks, scripts) or an eval case (skills).

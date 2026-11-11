@@ -88,9 +88,15 @@ cd "$dir"
 # 1. The tools that will install dependencies must enforce the rule. pnpm and npm silently
 #    ignore settings they don't know, so check their versions before anything is installed.
 case "$lang" in
-    python) need uv ;;
+    python)
+        need uv
+        v=$(uv --version | awk '{ print $2 }')
+        version_at_least "$v" 0.9.17 ||
+            die "uv $v can't read exclude-newer = \"14 days\" (the 14-day rule) and would skip it; update uv to 0.9.17 or newer (uv self update) and run again"
+        ;;
     typescript)
         pm=${pm:-pnpm}
+        need node
         need npm
         case "$pm" in
             pnpm)
@@ -146,11 +152,13 @@ case "$lang" in
                 printf '%s\n' "$node_version" >.nvmrc
                 ;;
         esac
-        # TypeScript: the newest release typescript-eslint supports (its peer range), so a new
-        # TypeScript major that the linter can't load yet is never installed.
-        ts_range=$(npm view typescript-eslint peerDependencies.typescript 2>/dev/null || true)
-        typescript="typescript${ts_range:+@$ts_range}"
         tools="@types/node${node_major:+@$node_major} vitest @vitest/coverage-v8 eslint @eslint/js typescript-eslint eslint-config-prettier prettier"
+        # TypeScript is added after the tools: the newest release the *installed* typescript-eslint
+        # supports (its peer range), so a TypeScript major the linter can't load is never installed.
+        # (`npm view` would read the newest typescript-eslint, which may be younger than 14 days.)
+        ts_range() {
+            node -p 'require("./node_modules/typescript-eslint/package.json").peerDependencies.typescript' 2>/dev/null || true
+        }
         case "$pm" in
             pnpm)
                 # Same major as the installed pnpm: pnpm also publishes patches for older majors.
@@ -161,11 +169,15 @@ case "$lang" in
                     die "pnpm $pnpm_version would ignore minimumReleaseAge; install pnpm 10.16 or newer"
                 npm pkg set "packageManager=pnpm@$pnpm_version"
                 # shellcheck disable=SC2086 # word splitting of the tool list is intended
-                pnpm add --save-dev "$typescript" $tools
+                pnpm add --save-dev $tools
+                range=$(ts_range)
+                pnpm add --save-dev "typescript${range:+@$range}"
                 ;;
             npm)
                 # shellcheck disable=SC2086
-                npm install --save-dev "$typescript" $tools
+                npm install --save-dev $tools
+                range=$(ts_range)
+                npm install --save-dev "typescript${range:+@$range}"
                 ;;
         esac
         ;;
