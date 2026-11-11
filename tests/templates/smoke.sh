@@ -49,6 +49,42 @@ if grep -rIl --exclude-dir=.git --exclude-dir=node_modules --exclude-dir=.venv -
     exit 1
 fi
 
+echo "== 14-day dependency rule"
+fail() {
+    echo "FAIL: $1" >&2
+    exit 1
+}
+has() { # FILE TEXT
+    grep -qF -- "$2" "$1" 2>/dev/null || fail "$1 does not contain: $2"
+}
+semver='[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'
+grep -q "version: \"$semver\"" .github/workflows/ci.yml || fail "CI does not pin uv to an exact version"
+grep -q "just-version: \"$semver\"" .github/workflows/ci.yml || fail "CI does not pin just to an exact version"
+[ "$lang" = python ] || has justfile 'uvx --exclude-newer "14 days" pre-commit'
+case "$lang" in
+    python)
+        has pyproject.toml 'exclude-newer = "14 days"'
+        has uv.lock 'exclude-newer-span = "P14D"'
+        ;;
+    typescript)
+        grep -q "^$semver\$" .nvmrc || fail ".nvmrc does not hold an exact Node version"
+        case "${pm:-pnpm}" in
+            pnpm)
+                has pnpm-workspace.yaml 'minimumReleaseAge: 20160'
+                grep -q "\"packageManager\": \"pnpm@$semver\"" package.json || fail "packageManager does not pin pnpm"
+                ;;
+            npm) has .npmrc 'min-release-age=14' ;;
+        esac
+        ;;
+    rust)
+        has .cargo/config.toml 'global-min-publish-age = "14 days"'
+        grep -q "^channel = \"$semver\"" rust-toolchain.toml || fail "rust-toolchain.toml does not pin a Rust release"
+        ;;
+    cpp)
+        grep -q '"builtin-baseline": "[0-9a-f]\{40\}"' vcpkg.json || fail "vcpkg.json has no baseline commit"
+        ;;
+esac
+
 if [ "$lang" = cpp ] && [ -z "${VCPKG_ROOT:-}" ]; then
     echo "== vcpkg at the manifest baseline (as the generated CI does)"
     baseline=$(sed -n 's/.*"builtin-baseline": *"\([0-9a-f]*\)".*/\1/p' vcpkg.json)

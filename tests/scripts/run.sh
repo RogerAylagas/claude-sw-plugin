@@ -46,7 +46,7 @@ expect() { # NAME EXPECTED_RC PATTERN  (after `run`)
 
 # Stub commands: STUB_<NAME>_OUT is printed, STUB_<NAME>_RC is the exit code.
 mkdir -p "$work/bin"
-for cmd in gh pnpm npm cargo; do
+for cmd in gh pnpm npm cargo rustup; do
     upper=$(printf '%s' "$cmd" | tr '[:lower:]' '[:upper:]')
     cat >"$work/bin/$cmd" <<EOF
 #!/bin/sh
@@ -94,6 +94,87 @@ fi
 
 run env PATH="$stub_path" STUB_GH_OUT=0123456789abcdef sh "$aged" --commit master owner/repo
 expect "aged-version: --commit prints the commit" 0 "^0123456789abcdef$"
+
+# --- init-project.sh: tool versions and pins, offline -------------------------------------
+
+init="$top/skills/setup-repo/scripts/init-project.sh"
+project() { # NAME -> empty project directory
+    mkdir -p "$work/$1"
+    printf '%s' "$work/$1"
+}
+calls() { # COMMAND -> its recorded calls, then forget them
+    cat "$work/$1.calls" 2>/dev/null
+    rm -f "$work/$1.calls"
+}
+refute() { # NAME PATTERN  (after `run`): exit 0 and output must not match
+    if [ "$rc" -ne 0 ]; then
+        not_ok "$1" "exit $rc; output: $out"
+    elif printf '%s' "$out" | grep -q -- "$2"; then
+        not_ok "$1" "output matches '$2': $out"
+    else
+        ok "$1"
+    fi
+}
+rm -f "$work"/*.calls
+
+dir=$(project pnpm-old)
+run env PATH="$stub_path" STUB_PNPM_OUT=10.15.0 sh "$init" --lang typescript --pm pnpm --dir "$dir"
+expect "init-project: pnpm older than 10.16 stops before installing" 1 "pnpm 10.15.0 ignores minimumReleaseAge"
+case "$(calls pnpm)" in
+    *add*) not_ok "init-project: pnpm older than 10.16 installs nothing" "pnpm add was called" ;;
+    *) ok "init-project: pnpm older than 10.16 installs nothing" ;;
+esac
+
+dir=$(project npm-old)
+run env PATH="$stub_path" STUB_NPM_OUT=11.9.0 sh "$init" --lang typescript --pm npm --dir "$dir"
+expect "init-project: npm older than 11.10 stops before installing" 1 "npm 11.9.0 ignores min-release-age"
+
+dir=$(project pnpm-pin)
+printf '24\n' >"$dir/.nvmrc"
+calls gh >/dev/null
+calls npm >/dev/null
+run env PATH="$stub_path" STUB_PNPM_OUT=10.16.0 STUB_GH_OUT='2026-01-01T00:00:00Z v10.20.0' \
+    sh "$init" --lang typescript --pm pnpm --dir "$dir"
+expect "init-project: pnpm 10.16 is accepted" 0 "typescript project initialised"
+gh_calls=$(calls gh)
+case "$gh_calls" in
+    *'startswith(\"v10.\")'* | *'startswith("v10.")'*) ok "init-project: pnpm is pinned within the installed major" ;;
+    *) not_ok "init-project: pnpm is pinned within the installed major" "gh calls: $gh_calls" ;;
+esac
+case "$(calls npm)" in
+    *'pkg set packageManager=pnpm@10.20.0'*) ok "init-project: packageManager names the aged pnpm release" ;;
+    *) not_ok "init-project: packageManager names the aged pnpm release" "npm was not asked to set packageManager=pnpm@10.20.0" ;;
+esac
+if [ "$(cat "$dir/.nvmrc")" = 10.20.0 ]; then
+    ok "init-project: a major-only .nvmrc becomes the aged exact version"
+else
+    not_ok "init-project: a major-only .nvmrc becomes the aged exact version" ".nvmrc: $(cat "$dir/.nvmrc")"
+fi
+
+dir=$(project rust-old)
+printf '[toolchain]\nchannel = "{{RUST_VERSION}}"\n' >"$dir/rust-toolchain.toml"
+run env PATH="$stub_path" STUB_GH_OUT='2026-10-16T00:00:00Z 1.99.1' STUB_CARGO_OUT='cargo 1.99.1 (abc123 2026-10-16)' \
+    sh "$init" --lang rust --dir "$dir" --name demo
+expect "init-project: cargo older than 1.100 gets a warning" 0 "cargo 1.99.1 ignores global-min-publish-age"
+if grep -q 'channel = "1.99.1"' "$dir/rust-toolchain.toml"; then
+    ok "init-project: rust-toolchain.toml is pinned to the aged release"
+else
+    not_ok "init-project: rust-toolchain.toml is pinned to the aged release" "$(cat "$dir/rust-toolchain.toml")"
+fi
+
+dir=$(project rust-new)
+run env PATH="$stub_path" STUB_GH_OUT='2026-11-26T00:00:00Z 1.100.0' STUB_CARGO_OUT='cargo 1.100.0 (def456 2026-11-12)' \
+    sh "$init" --lang rust --dir "$dir" --name demo
+refute "init-project: cargo 1.100 gets no warning" "ignores global-min-publish-age"
+
+dir=$(project cpp)
+printf '{ "builtin-baseline": "{{VCPKG_BASELINE}}" }\n' >"$dir/vcpkg.json"
+run env PATH="$stub_path" STUB_GH_OUT=0123456789abcdef sh "$init" --lang cpp --dir "$dir"
+if [ "$rc" -eq 0 ] && grep -q '"builtin-baseline": "0123456789abcdef"' "$dir/vcpkg.json"; then
+    ok "init-project: the vcpkg baseline is the aged commit"
+else
+    not_ok "init-project: the vcpkg baseline is the aged commit" "exit $rc; $(cat "$dir/vcpkg.json"); $out"
+fi
 
 # --- aged-version.sh, live at a fixed date ------------------------------------------------
 

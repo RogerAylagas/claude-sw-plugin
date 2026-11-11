@@ -25,11 +25,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
+      - name: Install the pinned Rust toolchain (rust-toolchain.toml)
+        run: rustup toolchain install
       - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: "{{UV_VERSION}}"
       - uses: extractions/setup-just@v4
+        with:
+          just-version: "{{JUST_VERSION}}"
       - uses: actions/cache@v6
         with:
           path: ~/.cache/pre-commit
@@ -49,11 +52,12 @@ jobs:
     #     image: postgres:17
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
+      - name: Install the pinned Rust toolchain (rust-toolchain.toml)
+        run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
       - uses: extractions/setup-just@v4
+        with:
+          just-version: "{{JUST_VERSION}}"
       - name: Clippy
         run: just analyze
       - name: Build

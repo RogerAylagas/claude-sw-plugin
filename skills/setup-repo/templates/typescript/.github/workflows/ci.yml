@@ -31,7 +31,11 @@ jobs:
         run: pnpm install --frozen-lockfile  # sw:if pm=pnpm
         run: npm ci  # sw:if pm=npm
       - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: "{{UV_VERSION}}"
       - uses: extractions/setup-just@v4
+        with:
+          just-version: "{{JUST_VERSION}}"
       - uses: actions/cache@v6
         with:
           path: ~/.cache/pre-commit
@@ -60,6 +64,8 @@ jobs:
         run: pnpm install --frozen-lockfile  # sw:if pm=pnpm
         run: npm ci  # sw:if pm=npm
       - uses: extractions/setup-just@v4
+        with:
+          just-version: "{{JUST_VERSION}}"
       - name: Type check
         run: just analyze
       - name: Build

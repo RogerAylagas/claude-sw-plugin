@@ -14,6 +14,12 @@ dependencies = []
 requires = ["{{UV_BUILD_REQ}}"]
 build-backend = "uv_build"
 
+[tool.uv]
+# 14-day dependency rule (AGENTS.md): never resolve a release younger than 14 days.
+# Urgent security fix only: exclude-newer-package = { <package> = false }, with a comment saying
+# why and the date it can be removed.
+exclude-newer = "14 days"
+
 [tool.ruff]
 line-length = 100
 src = ["src", "tests"]
