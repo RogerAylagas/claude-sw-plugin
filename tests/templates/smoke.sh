@@ -61,6 +61,15 @@ semver='[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*'
 grep -q "version: \"$semver\"" .github/workflows/ci.yml || fail "CI does not pin uv to an exact version"
 grep -q "just-version: \"$semver\"" .github/workflows/ci.yml || fail "CI does not pin just to an exact version"
 [ "$lang" = python ] || has justfile 'uvx --exclude-newer "14 days" pre-commit'
+ecosystems=$(grep -c 'package-ecosystem:' .github/dependabot.yml)
+cooldowns=$(grep -c 'default-days: 14' .github/dependabot.yml)
+[ "$ecosystems" -eq "$cooldowns" ] ||
+    fail "only $cooldowns of $ecosystems Dependabot ecosystems have a 14-day cooldown"
+has .github/dependabot.yml 'package-ecosystem: pre-commit'
+[ "$lang" != cpp ] || has .github/dependabot.yml 'package-ecosystem: vcpkg'
+if grep -rnE 'uses: [^ ]+@v[0-9]+( |$)' .github/workflows; then
+    fail "the actions above float on a major version tag; pin an exact release at least 14 days old"
+fi
 case "$lang" in
     python)
         has pyproject.toml 'exclude-newer = "14 days"'

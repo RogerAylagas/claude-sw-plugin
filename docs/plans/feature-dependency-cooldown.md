@@ -163,7 +163,7 @@ releases is the intended cost; security fixes skip it through Dependabot or an e
       pnpm/npm config, Cargo config, `rust-toolchain.toml`, CI, justfiles), `init-project.sh`,
       `GH_TOKEN` for the CI templates job; tests: `tests/scripts/run.sh` (version checks),
       `tests/templates/smoke.sh` checks
-- [ ] `feat(setup-repo): add Dependabot cooldown and pre-commit updates`: Dependabot templates and
+- [x] `feat(setup-repo): add Dependabot cooldown and pre-commit updates`: Dependabot templates and
       fragments, pre-commit config comments, downgrade template revs and action tags younger than
       14 days; tests: `just lint` schema check, smoke
 - [ ] `docs(setup-repo): document the 14-day rule and exemptions`: `SKILL.md`, references,

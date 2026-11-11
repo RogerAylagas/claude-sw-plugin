@@ -1,5 +1,7 @@
 # Quality gate. `just setup` installs it; CI runs it via `just lint`.
-# Update hook versions with `uvx pre-commit autoupdate`. Clippy runs in `just analyze`.
+# Dependabot updates the hook versions once a release is 14 days old (AGENTS.md). Don't run
+# `pre-commit autoupdate`: it ignores release age.
+# Clippy runs in `just analyze`.
 default_install_hook_types: [pre-commit, commit-msg]
 
 repos:
