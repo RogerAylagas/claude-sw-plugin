@@ -155,7 +155,7 @@ releases is the intended cost; security fixes skip it through Dependabot or an e
 
 ## Steps
 - [x] `docs(plans): add plan for the 14-day dependency rule`: this plan
-- [ ] `docs(adr): record the 14-day dependency rule`: `docs/adr/0002-dependency-cooldown.md`
+- [x] `docs(adr): record the 14-day dependency rule`: `docs/adr/0002-dependency-cooldown.md`
 - [ ] `feat(setup-repo): find releases at least 14 days old`: `scripts/aged-version.sh`,
       `tests/scripts/run.sh`, `justfile` (`test-scripts`), CI `test-scripts` job with `GH_TOKEN`
       added to `CI OK`; tests: `tests/scripts/run.sh`
