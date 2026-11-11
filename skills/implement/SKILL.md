@@ -91,9 +91,10 @@ Follow the plan's `integration_tests` value:
 
 ## Step 7: Full quality gate
 
-Run the same checks CI runs: `just check` if the repository has a justfile, otherwise the
-commands in AGENTS.md, CONTRIBUTING.md or the CI workflow (build, linters and formatters, type
-checks, unit and integration tests). Fix and re-run until everything passes.
+Run the same checks CI runs: `just check` if the repository has a justfile (without `just`
+installed: `uvx --exclude-newer "14 days" --from rust-just just check`), otherwise the commands in
+AGENTS.md, CONTRIBUTING.md or the CI workflow (build, linters and formatters, type checks, unit
+and integration tests). Fix and re-run until everything passes.
 
 Never make checks pass by deleting, skipping or weakening tests, by disabling lint or type rules,
 by adding ignore comments, or by lowering coverage thresholds, unless the plan says so or the user
@@ -103,6 +104,9 @@ agrees. If a failure was already there before your change, report it instead of 
 
 1. If behavior, commands or conventions changed, update README, AGENTS.md or CONTRIBUTING.md in a
    `docs:` commit.
-2. Set the plan's `status: done` and commit `docs(plans): mark <title> done`.
-3. Report: the commits made, tests added, check results, and any deviations from the plan.
+2. Tick each acceptance criterion (`- [ ]` → `- [x]`) that a passing test covers. Leave a
+   criterion unticked if no test covers it, and say why in the report. Then set the plan's
+   `status: done` and commit both: `docs(plans): mark <title> done`.
+3. Report: the commits made, tests added (with the criterion each covers), check results, any
+   criterion left unticked, and any deviations from the plan.
 4. Suggest the next step: `/sw:review-pr` to review the diff and open the pull request.

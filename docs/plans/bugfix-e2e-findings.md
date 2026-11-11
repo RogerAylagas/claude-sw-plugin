@@ -55,6 +55,7 @@ doesn't mention acceptance criteria.
 | `skills/setup-repo/SKILL.md` | Step 1: outdated uv and missing `just` (AC 2-3); Step 2: free plan + private (AC 1) |
 | `skills/setup-repo/templates/common/AGENTS.md` | `uvx` fallback for `just` (AC 3) |
 | `skills/implement/SKILL.md` | Step 7 fallback (AC 3); Step 8 ticks acceptance criteria (AC 4) |
+| `skills/fix/SKILL.md`, `skills/review-pr/SKILL.md` | Same `just` fallback where they run the gate (AC 3; added during implementation, both hit it in the trial) |
 | `evals/implement-ticks-acceptance-criteria/` | New eval case for AC 4 |
 
 ## Test strategy
@@ -67,7 +68,7 @@ doesn't mention acceptance criteria.
 ## Steps
 - [x] `docs(plans): add plan for the end-to-end trial findings`
 - [x] `test(evals): check that implement ticks acceptance criteria`: the eval case
-- [ ] `fix(implement): tick verified acceptance criteria and know the just fallback`
+- [x] `fix(implement): tick verified acceptance criteria and know the just fallback`
 - [ ] `fix(setup-repo): warn about protection on free private repos, offer uv and just`
 
 ## Open questions
