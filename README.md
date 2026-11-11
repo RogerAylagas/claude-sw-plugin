@@ -39,8 +39,13 @@ In Claude Code:
   the current branch, its plan and the next step. Before editing code on `main`/`develop`, on a
   badly named branch, or without an approved plan, Claude asks you once per session and branch.
   Documentation edits are never gated, and repositories without `docs/plans/` are not affected.
-- **Versions are never written from memory.** Setup lets the package managers resolve the latest
-  tools, and `pre-commit autoupdate` pins the hooks.
+- **Nothing younger than 14 days.** Generated projects never use a dependency, hook, action or
+  toolchain release less than 14 days old, which avoids most malicious releases (they are usually
+  pulled within days). Each package manager enforces it (uv `exclude-newer`, pnpm
+  `minimumReleaseAge`, npm `min-release-age`, Cargo `global-min-publish-age`); toolchains are
+  pinned to the newest eligible release; Dependabot waits 14 days before proposing updates.
+  Urgent security fixes get a per-package exemption. Details:
+  [ADR 0002](docs/adr/0002-dependency-cooldown.md).
 
 Setup templates: Python (uv, ruff, mypy, pytest), TypeScript/JavaScript (pnpm or npm, ESLint,
 Prettier, Vitest), Rust (cargo, rustfmt, clippy) and C++ (CMake presets, vcpkg, GoogleTest,

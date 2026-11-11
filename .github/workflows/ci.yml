@@ -21,7 +21,7 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
       - name: Branch name follows Conventional Branch
@@ -60,10 +60,14 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
-      - uses: extractions/setup-just@v4
-      - uses: actions/cache@v6
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.3.2
+        with:
+          version: "0.13.6"
+      - uses: extractions/setup-just@v4.0.0
+        with:
+          just-version: "1.59.0"
+      - uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -77,13 +81,15 @@ jobs:
     name: Validate plugin
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
         with:
-          node-version: lts/*
-      - uses: extractions/setup-just@v4
+          node-version: "24.22.1"
+      - uses: extractions/setup-just@v4.0.0
+        with:
+          just-version: "1.59.0"
       - name: Install Claude Code
-        run: npm install --global @anthropic-ai/claude-code
+        run: npm install --global --min-release-age=14 @anthropic-ai/claude-code
       - name: claude plugin validate
         run: just validate
 
@@ -98,8 +104,10 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v7
-      - uses: extractions/setup-just@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: extractions/setup-just@v4.0.0
+        with:
+          just-version: "1.59.0"
       - name: Hook tests
         run: just test-hooks
 
@@ -114,8 +122,10 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v7
-      - uses: extractions/setup-just@v4
+      - uses: actions/checkout@v7.0.1
+      - uses: extractions/setup-just@v4.0.0
+        with:
+          just-version: "1.59.0"
       - name: Script tests
         run: just test-scripts
         env:
@@ -140,25 +150,26 @@ jobs:
           - { lang: rust, kind: lib }
           - { lang: cpp, kind: app }
     steps:
-      - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10.3.3
-      - uses: extractions/setup-just@v4
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.3.2
+        with:
+          version: "0.13.6"
+      - uses: extractions/setup-just@v4.0.0
+        with:
+          just-version: "1.59.0"
+      - uses: actions/setup-node@v7.1.0
         if: matrix.lang == 'typescript'
         with:
-          node-version: lts/*
-      - uses: pnpm/action-setup@v6
+          node-version: "24.22.1"
+      - uses: pnpm/action-setup@v6.1.0
         if: matrix.pm == 'pnpm'
         with:
-          version: latest
-      - uses: dtolnay/rust-toolchain@stable
-        if: matrix.lang == 'rust'
-        with:
-          components: rustfmt, clippy
+          version: "12.16.1"
+      # Rust: the runner's rustup installs the toolchain the generated rust-toolchain.toml pins.
       - name: Install clang-tidy
         if: matrix.lang == 'cpp'
         run: sudo apt-get update && sudo apt-get install --yes clang-tidy
-      - uses: actions/cache@v6
+      - uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-templates-${{ runner.os }}-${{ hashFiles('skills/setup-repo/templates/**/.pre-commit-config.yaml', 'skills/setup-repo/templates/_fragments/precommit-common.yaml') }}

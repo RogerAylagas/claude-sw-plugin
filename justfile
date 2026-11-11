@@ -1,5 +1,5 @@
 # Development tasks for the sw plugin. CI runs these same recipes.
-# On Windows, run from Git Bash. Without just installed: `uvx --from rust-just just <recipe>`.
+# On Windows, run from Git Bash. Without just installed: `uvx --exclude-newer "14 days" --from rust-just just <recipe>`.
 
 # List recipes
 default:
@@ -10,7 +10,7 @@ check: lint validate test-hooks test-scripts
 
 # Formatting, file checks, shellcheck, secret scan
 lint:
-    uvx pre-commit run --all-files --show-diff-on-failure
+    uvx --exclude-newer "14 days" pre-commit run --all-files --show-diff-on-failure
 
 # Validate the plugin and marketplace manifests, skills, agents and hooks
 validate:
@@ -32,7 +32,3 @@ test-templates lang kind="app" pm="":
 # Cases that use Bash need Claude Code's sandbox (Linux, macOS or WSL2; not native Windows).
 evals threshold="0.7" max_cost="10":
     claude plugin eval . --trust-plugin --scaffold --allow-tools Bash Write Edit --threshold {{threshold}} --max-cost-usd {{max_cost}} --no-publish
-
-# Update pre-commit hook versions to their latest releases
-update-hooks:
-    uvx pre-commit autoupdate

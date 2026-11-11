@@ -4,7 +4,7 @@
 # integration tests).
 #
 # Usage: sh tests/templates/smoke.sh <python|typescript|rust|cpp> <lib|app> [package-manager]
-# Env:   JUST       just command (default: just; e.g. "uvx --from rust-just just")
+# Env:   JUST       just command (default: just; e.g. "uvx --exclude-newer '14 days' --from rust-just just")
 #        SMOKE_PYTHON  Python version for python projects (default: 3.13)
 #        KEEP=1     keep the generated project and print its path
 set -eu

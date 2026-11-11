@@ -1,5 +1,6 @@
 # Quality gate for this repo. CI runs the same hooks via `just lint`.
-# Install locally with `uvx pre-commit install` (installs the pre-commit and commit-msg hooks).
+# Install locally with `uvx --exclude-newer "14 days" pre-commit install` (pre-commit and commit-msg hooks).
+# Dependabot updates the hook versions once a release is 14 days old; never run `pre-commit autoupdate`.
 default_install_hook_types: [pre-commit, commit-msg]
 
 # Setup templates contain {{PLACEHOLDERS}} and are not valid YAML/JSON/TOML until rendered.

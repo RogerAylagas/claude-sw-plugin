@@ -173,7 +173,7 @@ releases is the intended cost; security fixes skip it through Dependabot or an e
       14 days; tests: `just lint` schema check, smoke
 - [x] `docs(setup-repo): document the 14-day rule and exemptions`: `SKILL.md`, references,
       `templates/README.md`, AGENTS and CONTRIBUTING fragments
-- [ ] `ci: apply the 14-day rule to this repository`: `.github/`, `justfile`,
+- [x] `ci: apply the 14-day rule to this repository`: `.github/`, `justfile`,
       `.pre-commit-config.yaml`, `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `docs/design.md`
 
 ## Open questions

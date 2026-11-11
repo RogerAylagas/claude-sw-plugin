@@ -23,7 +23,8 @@ There is deliberately no `CLAUDE.md` here: a `CLAUDE.md` at a plugin root is nev
 ## Commands
 
 Use the `justfile`; CI runs the same recipes. On Windows run them from Git Bash.
-If `just` is not installed, use `uvx --from rust-just just <recipe>` (needs [uv](https://docs.astral.sh/uv/)).
+If `just` is not installed, use `uvx --exclude-newer "14 days" --from rust-just just <recipe>`
+(needs [uv](https://docs.astral.sh/uv/)).
 
 | Command | What it does |
 |---|---|
@@ -60,6 +61,11 @@ If `just` is not installed, use `uvx --from rust-just just <recipe>` (needs [uv]
 - The branch and commit rules are defined in `skills/conventions/SKILL.md`. If you change them,
   update every copy in the same PR: `hooks/scripts/`, the setup templates (pre-commit config and CI
   `conventions` job), and this repo's `.pre-commit-config.yaml` and `.github/workflows/ci.yml`.
-- Never write tool or action versions from memory into templates: look them up
-  (`gh api repos/<owner>/<repo>/releases/latest`, `pre-commit autoupdate`).
+- **14-day dependency rule** ([ADR 0002](docs/adr/0002-dependency-cooldown.md)): never use a
+  dependency, hook, action or toolchain release younger than 14 days, here or in the templates,
+  and never write versions from memory. Find the newest eligible release with
+  `sh skills/setup-repo/scripts/aged-version.sh [--prefix vN.] <owner>/<repo>`. Pin actions to
+  exact releases, never floating `@vN` tags. Dependabot (14-day cooldown) updates hooks and
+  actions; never run `pre-commit autoupdate`. The toolchain pins in `.github/workflows/` (uv, just,
+  Node, pnpm) have no Dependabot support: refresh them by hand with `aged-version.sh`.
 - Every behavior change needs a test (hooks, scripts) or an eval case (skills).
