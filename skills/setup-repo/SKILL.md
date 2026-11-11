@@ -28,6 +28,12 @@ Run read-only checks and summarise the findings in a short table:
   dates), `uv`, `just`, and the language's tools (`node`/`pnpm`, `cargo`, `cmake`/`VCPKG_ROOT`).
   Note what's missing and how to install it; don't install system tools without asking. Versions
   that enforce the 14-day rule: uv 0.9.17+, pnpm 10.16+, npm 11.10+, Cargo 1.100+.
+- Outdated uv: compare `uv --version` with the newest uv release at least 14 days old
+  (`sh "${CLAUDE_PLUGIN_ROOT}/skills/setup-repo/scripts/aged-version.sh" astral-sh/uv`). An older
+  uv offers fewer Python versions. Offer `uv self update <that version>`; never a plain
+  `uv self update`, which installs the newest release, however young.
+- Missing `just`: offer `uv tool install --exclude-newer "14 days" rust-just`. Until it's
+  installed, run recipes with `uvx --exclude-newer "14 days" --from rust-just just <recipe>`.
 - With a GitHub remote: default branch, whether `develop` exists, branch protection
   (`gh api repos/<o>/<r>/branches/<b>/protection`, 404 = none).
 
@@ -50,6 +56,10 @@ Use AskUserQuestion (at most 4 questions per call, recommended option first with
    name. The user can type their own through "Other".
 6. GitHub: create the repository if there is no remote (public or private?), and whether to apply
    branch protection (recommended), with how many required approvals (0 for solo projects).
+   The private option must say that branch protection on private repositories needs a paid
+   GitHub plan (Pro, Team or Enterprise). Name the account's plan if
+   `gh api user --jq .plan.name` returns one; it is often `null`, because GitHub only reports
+   the plan to tokens with the `user` scope.
 
 For a language without templates, research its current official tooling (formatter, linter,
 type checker or analyzer, test runner, package manager) before asking, and follow
@@ -120,6 +130,12 @@ List every remote-changing action and ask for one confirmation before starting. 
   (required check `CI OK`), run `just setup` to install the hooks, and watch the first CI run.
 - Retrofit: one commit per area on `chore/sw-setup`, push, and open a PR into `develop` (or the
   default branch). Repository settings only with explicit approval.
+
+If protection fails with HTTP 403 ("Upgrade to GitHub Pro or make this repository public"), the
+repository is private on a free plan. Carry on with the other steps, and say in the report that
+the local pre-commit hooks still block commits to `main` and `develop`, but nothing on GitHub
+does. To get protection: make the repository public or upgrade the plan, then re-run the
+protection step.
 
 ## Step 9: Report
 

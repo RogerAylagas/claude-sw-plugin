@@ -2,7 +2,7 @@
 title: Fix the findings of the first end-to-end trial
 type: bugfix
 branch: bugfix/e2e-findings
-status: in-progress
+status: done
 integration_tests: not-needed
 ---
 
@@ -41,7 +41,7 @@ doesn't mention acceptance criteria.
 - [ ] Given `just` is missing, then setup-repo offers `uv tool install --exclude-newer "14 days"
       rust-just`, and the generated AGENTS.md tells later sessions to run recipes with
       `uvx --exclude-newer "14 days" --from rust-just just <recipe>`; implement Step 7 says the same.
-- [ ] Given an implementation whose tests pass, when implement finishes, then every acceptance
+- [x] Given an implementation whose tests pass, when implement finishes, then every acceptance
       criterion with a passing test is ticked in the plan, naming the test; any criterion left
       unticked is reported with the reason.
 
@@ -69,7 +69,10 @@ doesn't mention acceptance criteria.
 - [x] `docs(plans): add plan for the end-to-end trial findings`
 - [x] `test(evals): check that implement ticks acceptance criteria`: the eval case
 - [x] `fix(implement): tick verified acceptance criteria and know the just fallback`
-- [ ] `fix(setup-repo): warn about protection on free private repos, offer uv and just`
+- [x] `fix(setup-repo): warn about protection on free private repos, offer uv and just`
 
 ## Open questions
-None.
+- AC 4 was verified on 2026-11-11 with a headless `claude -p` run on the new eval's fixture: both
+  criteria were ticked, each naming its test, in the `docs(plans): mark ... done` commit.
+- AC 1-3 are left unticked: they change setup-repo's instructions (questions, offers, the report),
+  which only an interactive `/sw:setup-repo` run exercises. They were checked by review.
