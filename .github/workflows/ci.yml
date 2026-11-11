@@ -123,6 +123,10 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v7.0.1
+      # uvx runs git-cliff for the changelog checks.
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: "0.13.6"
       - uses: extractions/setup-just@v4.0.0
         with:
           just-version: "1.59.0"
