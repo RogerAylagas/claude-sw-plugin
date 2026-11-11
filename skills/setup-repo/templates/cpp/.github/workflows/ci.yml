@@ -75,8 +75,17 @@ jobs:
       CXX: clang++
     steps:
       - uses: actions/checkout@v7.0.1
-      - name: Install clang-tidy
-        run: sudo apt-get update && sudo apt-get install --yes clang-tidy
+      - name: Set up clang-tidy
+        # The runner image ships versioned clang-tidy binaries: link the one matching clang++, so
+        # the job doesn't depend on the Ubuntu package mirrors. apt is only the fallback.
+        run: |
+          major=$(clang++ -dumpversion | cut -d. -f1)
+          if tidy=$(command -v "clang-tidy-$major"); then
+            sudo ln -sf "$tidy" /usr/local/bin/clang-tidy
+          else
+            sudo apt-get update && sudo apt-get install --yes clang-tidy
+          fi
+          clang-tidy --version
 # sw:include ci-cpp-vcpkg.yml
       - uses: extractions/setup-just@v4.0.0
         with:

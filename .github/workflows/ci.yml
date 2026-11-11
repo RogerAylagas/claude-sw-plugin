@@ -170,9 +170,19 @@ jobs:
         with:
           version: "12.16.1"
       # Rust: the runner's rustup installs the toolchain the generated rust-toolchain.toml pins.
-      - name: Install clang-tidy
+      # Same step as the generated C++ CI (templates/cpp/.github/workflows/ci.yml): keep in sync.
+      - name: Set up clang-tidy
         if: matrix.lang == 'cpp'
-        run: sudo apt-get update && sudo apt-get install --yes clang-tidy
+        # The runner image ships versioned clang-tidy binaries: link the one matching clang++, so
+        # the job doesn't depend on the Ubuntu package mirrors. apt is only the fallback.
+        run: |
+          major=$(clang++ -dumpversion | cut -d. -f1)
+          if tidy=$(command -v "clang-tidy-$major"); then
+            sudo ln -sf "$tidy" /usr/local/bin/clang-tidy
+          else
+            sudo apt-get update && sudo apt-get install --yes clang-tidy
+          fi
+          clang-tidy --version
       - uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/pre-commit
