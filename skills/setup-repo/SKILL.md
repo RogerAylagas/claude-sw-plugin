@@ -31,7 +31,9 @@ Run read-only checks and summarise the findings in a short table:
 - Outdated uv: compare `uv --version` with the newest uv release at least 14 days old
   (`sh "${CLAUDE_PLUGIN_ROOT}/skills/setup-repo/scripts/aged-version.sh" astral-sh/uv`). An older
   uv offers fewer Python versions. Offer `uv self update <that version>`; never a plain
-  `uv self update`, which installs the newest release, however young.
+  `uv self update`, which installs the newest release, however young. If uv came from a package
+  manager (Homebrew, pip, winget, ...), `uv self update` refuses: offer to update it there, to a
+  release at least 14 days old.
 - Missing `just`: offer `uv tool install --exclude-newer "14 days" rust-just`. Until it's
   installed, run recipes with `uvx --exclude-newer "14 days" --from rust-just just <recipe>`.
 - With a GitHub remote: default branch, whether `develop` exists, branch protection
@@ -57,9 +59,10 @@ Use AskUserQuestion (at most 4 questions per call, recommended option first with
 6. GitHub: create the repository if there is no remote (public or private?), and whether to apply
    branch protection (recommended), with how many required approvals (0 for solo projects).
    The private option must say that branch protection on private repositories needs a paid
-   GitHub plan (Pro, Team or Enterprise). Name the account's plan if
-   `gh api user --jq .plan.name` returns one; it is often `null`, because GitHub only reports
-   the plan to tokens with the `user` scope.
+   GitHub plan (Pro, Team or Enterprise). Name the owner's plan if GitHub returns it:
+   `gh api user --jq .plan.name` for a personal account, `gh api orgs/<org> --jq .plan.name` for
+   an organisation. It is often `null` (GitHub only reports it to tokens with the `user` scope,
+   or to organisation owners), so never rely on it.
 
 For a language without templates, research its current official tooling (formatter, linter,
 type checker or analyzer, test runner, package manager) before asking, and follow

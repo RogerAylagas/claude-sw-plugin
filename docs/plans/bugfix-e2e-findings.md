@@ -32,18 +32,19 @@ doesn't mention acceptance criteria.
 ## Acceptance criteria
 - [ ] Given setup-repo asks whether the new repository is public or private, then the private
       option says that branch protection on private repositories needs a paid GitHub plan (Pro,
-      Team or Enterprise), naming the account's plan when `gh api user --jq .plan.name` returns one
-      (it is `null` for tokens without the `user` scope, so it can't be relied on). If protection
-      then fails with HTTP 403, the report says why and what would enable it.
+      Team or Enterprise), naming the owner's plan when GitHub returns it (user or organisation;
+      it is often `null`, so it can't be relied on). If protection then fails with HTTP 403, the
+      report says why and what would enable it.
 - [ ] Given a local uv older than the newest uv release at least 14 days old, when setup-repo
-      inspects the tools, then it offers `uv self update <that version>`, never a plain
-      `uv self update` (which would install a release younger than 14 days).
+      inspects the tools, then it offers `uv self update <that version>` (or an update through the
+      package manager that installed uv), never a plain `uv self update`, which would install a
+      release younger than 14 days. `init-project.sh`'s "uv too old" message says the same.
 - [ ] Given `just` is missing, then setup-repo offers `uv tool install --exclude-newer "14 days"
       rust-just`, and the generated AGENTS.md tells later sessions to run recipes with
       `uvx --exclude-newer "14 days" --from rust-just just <recipe>`; implement Step 7 says the same.
 - [x] Given an implementation whose tests pass, when implement finishes, then every acceptance
-      criterion with a passing test is ticked in the plan, naming the test; any criterion left
-      unticked is reported with the reason.
+      criterion with a passing test is ticked in the plan, and the report names the test covering
+      each; any criterion left unticked is reported with the reason.
 
 ## Out of scope
 - Installing anything without the user's approval.
@@ -57,12 +58,19 @@ doesn't mention acceptance criteria.
 | `skills/implement/SKILL.md` | Step 7 fallback (AC 3); Step 8 ticks acceptance criteria (AC 4) |
 | `skills/fix/SKILL.md`, `skills/review-pr/SKILL.md` | Same `just` fallback where they run the gate (AC 3; added during implementation, both hit it in the trial) |
 | `evals/implement-ticks-acceptance-criteria/` | New eval case for AC 4 |
+| `evals/setup-repo-private-needs-paid-plan/` | New eval case for AC 1 (added after code review) |
+| `skills/setup-repo/scripts/init-project.sh` | "uv too old" message suggests the aged uv release (AC 2; added after code review) |
+| `tests/templates/smoke.sh` | Checks that the generated AGENTS.md has the `just` fallback (AC 3; added after code review) |
 
 ## Test strategy
-- Unit: none; these are skill instructions.
-- Eval: `evals/implement-ticks-acceptance-criteria/` (an approved plan with two criteria; graded on
-  whether implement ticks them). Like the other evals, it costs model calls and runs on demand
-  (Linux, macOS, WSL2 or the Evals workflow).
+- Unit: none; these are skill instructions. The "uv too old" message keeps its existing script
+  test.
+- Evals (they cost model calls and run on demand: Linux, macOS, WSL2 or the Evals workflow):
+  `evals/implement-ticks-acceptance-criteria/` (AC 4) and `evals/setup-repo-private-needs-paid-plan/`
+  (AC 1).
+- Template smoke tests: every generated AGENTS.md contains the `uvx` fallback for `just` (AC 3).
+- Exception, AC 2: no eval. It needs an outdated `uv` on the session's `PATH`, which a scaffold
+  script can't arrange for the session it scaffolds. Covered by review.
 - `just check` (lint, validate, hook and script tests) and the template smoke tests in CI.
 
 ## Steps
@@ -73,6 +81,11 @@ doesn't mention acceptance criteria.
 
 ## Open questions
 - AC 4 was verified on 2026-11-11 with a headless `claude -p` run on the new eval's fixture: both
-  criteria were ticked, each naming its test, in the `docs(plans): mark ... done` commit.
-- AC 1-3 are left unticked: they change setup-repo's instructions (questions, offers, the report),
-  which only an interactive `/sw:setup-repo` run exercises. They were checked by review.
+  criteria were ticked in the `docs(plans): mark ... done` commit, and the report named the test
+  covering each.
+- AC 1-3 are left unticked: they change setup-repo's instructions, which only an interactive
+  `/sw:setup-repo` run (or the AC 1 eval, run on demand) exercises. The generated-AGENTS.md part
+  of AC 3 is checked by the smoke tests.
+- Code review (2026-11-11): REQUEST CHANGES with 5 findings (missing tests for AC 1-3, organisation
+  plans, a plain `uv self update` in a message, package-manager installs of uv, AC 4 wording);
+  all addressed, with AC 2's eval recorded as an exception above.
