@@ -1,12 +1,13 @@
 {
   "name": "sw",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Software lifecycle workflows: repo setup and retrofit (AGENTS.md, dependency manager, main/develop branches, pre-commit, CI, CONTRIBUTING), planning with design principles, plan-driven implementation with tests, bug fixes, review & PR, and releases. Conventional Commits and Conventional Branch throughout.",
   "author": {
     "name": "Roger Aylagas Torres"
   },
   "homepage": "https://github.com/RogerAylagas/claude-sw-plugin",
   "repository": "https://github.com/RogerAylagas/claude-sw-plugin",
+  "license": "MIT",
   "keywords": [
     "workflow",
     "planning",

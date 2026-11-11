@@ -1,0 +1,51 @@
+[project]
+name = "{{PROJECT_NAME}}"
+version = "0.1.0"
+description = "{{DESCRIPTION}}"
+readme = "README.md"
+authors = [{ name = "{{AUTHOR}}" }]
+requires-python = ">={{PYTHON_VERSION}}"
+dependencies = []
+
+[project.scripts]  # sw:if kind=app
+{{PROJECT_NAME}} = "{{PACKAGE_NAME}}.__main__:main"  # sw:if kind=app
+
+[build-system]
+requires = ["{{UV_BUILD_REQ}}"]
+build-backend = "uv_build"
+
+[tool.uv]
+# 14-day dependency rule (AGENTS.md): never resolve a release younger than 14 days.
+# Urgent security fix only: exclude-newer-package = { <package> = false }, with a comment saying
+# why and the date it can be removed.
+exclude-newer = "14 days"
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, isort, bugbear, pyupgrade, simplify, ruff, naming, bandit,
+# comprehensions, pytest style, returns, unused arguments.
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "RUF", "N", "S", "C4", "PT", "RET", "ARG"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests use assert and may start subprocesses with trusted arguments.
+"tests/**" = ["S101", "S603"]
+
+[tool.mypy]
+strict = true
+files = ["src", "tests"]
+mypy_path = "src"
+
+[tool.pytest.ini_options]
+addopts = ["-ra", "--strict-markers", "--strict-config", "--import-mode=importlib"]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["{{PACKAGE_NAME}}"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

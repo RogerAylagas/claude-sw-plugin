@@ -1,0 +1,7 @@
+# C++ / CMake / vcpkg
+/build/
+/vcpkg_installed/
+/.cache/
+compile_commands.json
+CMakeUserPresets.json
+# sw:include gitignore-common

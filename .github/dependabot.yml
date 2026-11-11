@@ -1,3 +1,5 @@
+# 14-day dependency rule (docs/adr/0002-dependency-cooldown.md): Dependabot proposes a new
+# version only once it is at least 14 days old. Security updates skip the wait.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -5,9 +7,24 @@ updates:
     target-branch: develop
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 14
     commit-message:
       prefix: chore
       include: scope
     groups:
       github-actions:
+        patterns: ["*"]
+  - package-ecosystem: pre-commit
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      pre-commit:
         patterns: ["*"]

@@ -1,0 +1,15 @@
+# Quality gate. `just setup` installs it; CI runs it via `just lint`.
+# Dependabot updates the hook versions once a release is 14 days old (AGENTS.md). Don't run
+# `pre-commit autoupdate`: it ignores release age.
+default_install_hook_types: [pre-commit, commit-msg]
+
+repos:
+# sw:include precommit-common.yaml
+
+  # --- Python ---
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.3
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format

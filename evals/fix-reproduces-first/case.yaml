@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: fix-reproduces-first
+description: A bug report leads to a bugfix/ branch, a failing test written before the fix, and a Conventional "fix" commit.
+tags: [fix, conventions]
+context:
+  scaffold_script: fixture.sh

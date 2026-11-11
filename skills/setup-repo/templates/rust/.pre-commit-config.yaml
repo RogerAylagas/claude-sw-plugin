@@ -1,0 +1,18 @@
+# Quality gate. `just setup` installs it; CI runs it via `just lint`.
+# Dependabot updates the hook versions once a release is 14 days old (AGENTS.md). Don't run
+# `pre-commit autoupdate`: it ignores release age.
+# Clippy runs in `just analyze`.
+default_install_hook_types: [pre-commit, commit-msg]
+
+repos:
+# sw:include precommit-common.yaml
+
+  # --- Rust ---
+  - repo: local
+    hooks:
+      - id: cargo-fmt
+        name: cargo fmt
+        entry: cargo fmt --all
+        language: system
+        types: [rust]
+        pass_filenames: false

@@ -5,8 +5,9 @@ Thanks for helping! This plugin follows the same workflow it teaches.
 ## Setup
 
 1. Install [uv](https://docs.astral.sh/uv/) and the [GitHub CLI](https://cli.github.com/).
-   Optional: [just](https://just.systems) (otherwise use `uvx --from rust-just just`).
-2. Install the git hooks: `uvx pre-commit install` (installs both the `pre-commit` and `commit-msg` hooks).
+   Optional: [just](https://just.systems) (otherwise use `uvx --exclude-newer "14 days" --from rust-just just`).
+2. Install the git hooks: `uvx --exclude-newer "14 days" pre-commit install` (installs both the
+   `pre-commit` and `commit-msg` hooks).
 3. Try the plugin locally from a Claude Code session:
    `/plugin marketplace add ./` then `/plugin install sw@claude-sw-plugin`.
 
@@ -46,7 +47,9 @@ On Windows, run `just` recipes from Git Bash.
 ## Testing expectations
 
 - Hook scripts and helper scripts: add or update a case in `tests/`.
-- Skills: add or update an eval case in `evals/` and run it (`just evals`, costs real model calls).
+- Skills: add or update an eval case in `evals/` and run it (`just evals`, costs real model calls;
+  cases that use Bash need Claude Code's sandbox, so run them on Linux, macOS or WSL2, or with
+  the manual **Evals** workflow, which needs an `ANTHROPIC_API_KEY` repository secret).
 - Templates: `just test-templates <language>` renders the templates into a temporary project and
   runs its full check.
 

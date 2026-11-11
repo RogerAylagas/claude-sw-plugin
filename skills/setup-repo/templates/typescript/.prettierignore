@@ -1,0 +1,9 @@
+# Prettier formats code only. Markdown, YAML and JSON are checked by other hooks, and
+# package.json / lock files are written by the package manager.
+dist/
+coverage/
+node_modules/
+*.md
+*.yml
+*.yaml
+*.json

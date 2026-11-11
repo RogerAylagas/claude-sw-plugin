@@ -1,0 +1,38 @@
+# {{PROJECT_NAME}} tasks. CI runs these same recipes; `just check` must pass before a PR.
+set windows-shell := ["powershell.exe", "-NoLogo", "-NoProfile", "-Command"]
+
+# List recipes
+default:
+    @just --list
+
+# Install dependencies and git hooks (run once after cloning)
+setup:
+    {{PM}} install
+    uvx --exclude-newer "14 days" pre-commit install
+
+# Format code
+fmt:
+    {{PM}} run format
+
+# All pre-commit hooks on all files (prettier, eslint, file checks, secrets)
+lint:
+    uvx --exclude-newer "14 days" pre-commit run --all-files --show-diff-on-failure
+
+# Static type checks (tsc)
+analyze:
+    {{PM}} run typecheck
+
+# Compile to dist/
+build:
+    {{PM}} run build
+
+# Unit tests with coverage
+test:
+    {{PM}} run test
+
+# Integration tests
+test-integration:
+    {{PM}} run test:integration
+
+# Everything CI runs
+check: lint analyze build test test-integration

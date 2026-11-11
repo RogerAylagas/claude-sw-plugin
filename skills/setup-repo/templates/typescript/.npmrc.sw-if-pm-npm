@@ -1,0 +1,6 @@
+# 14-day dependency rule (AGENTS.md): npm never installs a release younger than 14 days.
+# Needs npm 11.10 or newer; older versions ignore this line.
+min-release-age=14
+# Urgent security fix only (npm 11.17+): exempt one package, with a comment saying why and the
+# date it can be removed.
+# min-release-age-exclude[]=<package>

@@ -1,0 +1,7 @@
+# 14-day dependency rule (AGENTS.md): pnpm never installs a release younger than 14 days
+# (20160 minutes), including transitive dependencies.
+minimumReleaseAge: 20160
+# Urgent security fix only: list the package here, with a comment saying why and the date it
+# can be removed.
+# minimumReleaseAgeExclude:
+#   - <package>

@@ -21,7 +21,7 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
       - name: Branch name follows Conventional Branch
@@ -60,10 +60,14 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
       - uses: astral-sh/setup-uv@v10.3.3
-      - uses: extractions/setup-just@v4
-      - uses: actions/cache@v6
+        with:
+          version: "0.13.6"
+      - uses: extractions/setup-just@v4.0.0
+        with:
+          just-version: "1.59.0"
+      - uses: actions/cache@v6.1.0
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -77,21 +81,110 @@ jobs:
     name: Validate plugin
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
         with:
-          node-version: lts/*
-      - uses: extractions/setup-just@v4
+          node-version: "24.22.1"
+      - uses: extractions/setup-just@v4.0.0
+        with:
+          just-version: "1.59.0"
       - name: Install Claude Code
-        run: npm install --global @anthropic-ai/claude-code
+        run: npm install --global --min-release-age=14 @anthropic-ai/claude-code
       - name: claude plugin validate
         run: just validate
+
+  hook-tests:
+    name: Hook tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: extractions/setup-just@v4.0.0
+        with:
+          just-version: "1.59.0"
+      - name: Hook tests
+        run: just test-hooks
+
+  script-tests:
+    name: Script tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7.0.1
+      # uvx runs git-cliff for the changelog checks.
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: "0.13.6"
+      - uses: extractions/setup-just@v4.0.0
+        with:
+          just-version: "1.59.0"
+      - name: Script tests
+        run: just test-scripts
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  templates:
+    name: Template (${{ matrix.lang }}, ${{ matrix.kind }}${{ matrix.pm && format(', {0}', matrix.pm) || '' }})
+    # Renders each setup-repo template, initialises it and runs its full `just check`.
+    runs-on: ubuntu-latest
+    env:
+      # init-project.sh looks up release dates with gh (14-day dependency rule).
+      GH_TOKEN: ${{ github.token }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { lang: python, kind: app }
+          - { lang: python, kind: lib }
+          - { lang: typescript, kind: app, pm: pnpm }
+          - { lang: typescript, kind: lib, pm: npm }
+          - { lang: rust, kind: app }
+          - { lang: rust, kind: lib }
+          - { lang: cpp, kind: app }
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          version: "0.13.6"
+      - uses: extractions/setup-just@v4.0.0
+        with:
+          just-version: "1.59.0"
+      - uses: actions/setup-node@v7.1.0
+        if: matrix.lang == 'typescript'
+        with:
+          node-version: "24.22.1"
+      - uses: pnpm/action-setup@v6.1.0
+        if: matrix.pm == 'pnpm'
+        with:
+          version: "12.16.1"
+      # Rust: the runner's rustup installs the toolchain the generated rust-toolchain.toml pins.
+      - name: Install clang-tidy
+        if: matrix.lang == 'cpp'
+        run: sudo apt-get update && sudo apt-get install --yes clang-tidy
+      - uses: actions/cache@v6.1.0
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-templates-${{ runner.os }}-${{ hashFiles('skills/setup-repo/templates/**/.pre-commit-config.yaml', 'skills/setup-repo/templates/_fragments/precommit-common.yaml') }}
+      - name: Smoke test
+        run: just test-templates ${{ matrix.lang }} ${{ matrix.kind }} ${{ matrix.pm }}
 
   ci-ok:
     name: CI OK
     # Single required status check for branch protection; add new jobs to `needs`.
     if: always()
-    needs: [conventions, lint, validate]
+    needs: [conventions, lint, validate, hook-tests, script-tests, templates]
     runs-on: ubuntu-latest
     steps:
       - name: All jobs passed or were skipped

@@ -1,0 +1,17 @@
+# 14-day dependency rule (AGENTS.md): Dependabot proposes a new version only once it is at
+# least 14 days old. Security updates skip the wait.
+version: 2
+updates:
+  # Moves vcpkg.json's builtin-baseline to a newer microsoft/vcpkg commit.
+  - package-ecosystem: vcpkg
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14
+    commit-message:
+      prefix: chore
+      include: scope
+# sw:include dependabot-precommit.yml
+# sw:include dependabot-actions.yml

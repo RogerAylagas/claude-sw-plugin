@@ -1,0 +1,46 @@
+name: Evals
+
+# Behavior evals make real model calls billed to the ANTHROPIC_API_KEY secret, so they run on
+# demand (for example before a release), never on every push.
+on:
+  workflow_dispatch:
+    inputs:
+      threshold:
+        description: Minimum score per case (0 to 1)
+        default: "0.7"
+      max_cost_usd:
+        description: Cost ceiling for the run, in USD
+        default: "10"
+
+permissions:
+  contents: read
+
+jobs:
+  evals:
+    name: Plugin evals
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: "24.22.1"
+      - uses: extractions/setup-just@v4.0.0
+        with:
+          just-version: "1.59.0"
+      - name: Install Claude Code
+        run: npm install --global --min-release-age=14 @anthropic-ai/claude-code
+      - name: Install sandbox prerequisites (cases run Bash inside the sandbox)
+        run: sudo apt-get update && sudo apt-get install --yes bubblewrap socat
+      - name: Run evals
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          THRESHOLD: ${{ inputs.threshold }}
+          MAX_COST_USD: ${{ inputs.max_cost_usd }}
+        run: just evals "$THRESHOLD" "$MAX_COST_USD"
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: eval-results
+          path: evals/results/
+          if-no-files-found: ignore
