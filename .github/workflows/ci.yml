@@ -165,7 +165,7 @@ jobs:
         if: matrix.lang == 'typescript'
         with:
           node-version: "24.22.1"
-      - uses: pnpm/action-setup@v6.1.0
+      - uses: pnpm/action-setup@v6.1.1
         if: matrix.pm == 'pnpm'
         with:
           version: "12.16.1"
